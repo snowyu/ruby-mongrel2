@@ -15,8 +15,12 @@ module Mongrel2
 	# Version-control revision constant
 	REVISION = %q$Revision$
 
+
 	require 'mongrel2/logging'
 	extend Mongrel2::Logging
+
+	require 'mongrel2/constants'
+	include Mongrel2::Constants
 
 
 	### Get the Treequel version. If +include_buildnum+ is true, the version string will

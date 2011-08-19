@@ -16,18 +16,18 @@ require 'spec/lib/constants'
 require 'spec/lib/helpers'
 
 require 'mongrel2'
-require 'mongrel2/model'
+require 'mongrel2/config'
 
 
 #####################################################################
 ###	C O N T E X T S
 #####################################################################
 
-describe Mongrel2::Model do
+describe Mongrel2::Config do
 
 	it "has a factory method for creating derivative classes" do
-		model_class = Mongrel2::Model( :hookers )
-		model_class.should < Mongrel2::Model
+		model_class = Mongrel2::Config( :hookers )
+		model_class.should < Mongrel2::Config
 		model_class.dataset.first_source.should == :hookers
 	end
 

@@ -16,14 +16,34 @@ module Mongrel2
 	# especially its Sequel::Model ORM. 
 	#
 	# See the Sequel::Plugins::InlineMigrations module and the documentation for the
-	# 'validation_helpers', 'schema', and 'subclasses' Sequel plugins.
+	# 'validation_helpers' and 'subclasses' Sequel plugins.
 	# 
-	class Model < Sequel::Model
+	class Config < Sequel::Model
 		include Mongrel2::Loggable
 
 		plugin :validation_helpers
-		plugin :schema
 		plugin :subclasses
+
+		# Configuration defaults
+		DEFAULTS = {
+			:configdb => Mongrel2::DEFAULT_CONFIG_URI,
+		}
+
+		# Register this class as configurable if Configurability is loaded.
+		if defined?( Configurability )
+			extend Configurability
+			config_key :mongrel2
+		end
+
+
+		### Configurability API -- called when the configuration is loaded with the
+		### 'mongrel2' section of the config file if there is one. This method can also be used
+		### without Configurability by passing an object that can be merged with
+		### Mongrel2::Config::DEFAULTS.
+		def self::configure( config={} )
+			config = DEFAULTS.merge( config )
+			self.db = Sequel.sqlite( config[:configdb] ) if config[ :configdb ]
+		end
 
 
 		### Reset the database connection that all model objects will use to +newdb+, which should
@@ -36,19 +56,26 @@ module Mongrel2
 			end
 		end
 
-	end # class Model
+
+		### Return the Array of currently-configured servers in the config database as
+		### Mongrel2::Config::Server objects.
+		def self::servers
+			return Mongrel2::Config::Server.all
+		end
+
+	end # class Config
 
 
 	### Overridden version of Sequel.Model() that creates subclasses of Mongrel2::Model instead
 	### of Sequel::Model.
-	def self::Model( source )
+	def self::Config( source )
 		unless Sequel::Model::ANONYMOUS_MODEL_CLASSES.key?( source )
 			anonclass = nil
 		 	if source.is_a?( Sequel::Database )
-				anonclass = Class.new( Mongrel2::Model )
+				anonclass = Class.new( Mongrel2::Config )
 				anonclass.db = source
 			else
-				anonclass = Class.new( Mongrel2::Model ).set_dataset( source )
+				anonclass = Class.new( Mongrel2::Config ).set_dataset( source )
 			end
 
 			Sequel::Model::ANONYMOUS_MODEL_CLASSES[ source ] = anonclass
@@ -57,4 +84,15 @@ module Mongrel2
 		return Sequel::Model::ANONYMOUS_MODEL_CLASSES[ source ]
 	end
 
+	require 'mongrel2/config/directory'
+	require 'mongrel2/config/handler'
+	require 'mongrel2/config/host'
+	require 'mongrel2/config/proxy'
+	require 'mongrel2/config/route'
+	require 'mongrel2/config/server'
+	require 'mongrel2/config/setting'
+	require 'mongrel2/config/log'
+	require 'mongrel2/config/statistic'
+
 end # module Mongrel2
+

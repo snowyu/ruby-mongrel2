@@ -1,22 +1,22 @@
-# Mongrel2
+= Mongrel2
 
-* FIX (url)
+* https://bitbucket.org/ged/ruby-mongrel2
 
-## Description
+== Description
 
-FIX (describe your package)
+A Mongrel2 
 
 
-## Installation
+== Installation
 
     gem install Mongrel2
 
 
-## Contributing
+== Contributing
 
 You can check out the current development source with Mercurial via its
-[Bitbucket project][bitbucket]. Or if you prefer Git, via 
-[its Github mirror][github].
+{Bitbucket project}[https://bitbucket.org/ged/ruby-mongrel2]. Or if you prefer Git, via 
+{its Github mirror}[https://github.com/ged/ruby-mongrel2].
 
 After checking out the source, run:
 
@@ -26,7 +26,7 @@ This task will install any missing dependencies, run the tests/specs,
 and generate the API documentation.
 
 
-## License
+== License
 
 Copyright (c) 2011, Michael Granger
 All rights reserved.
@@ -56,6 +56,3 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-[bitbucket]: FIX (bitbucket or hg repo)
-[github]: FIX (github mirror)
