@@ -4,12 +4,14 @@
 
 == Description
 
-A Mongrel2 
+A Mongrel2-specific, middleware-less handler framework for Ruby. 
+
+More details forthcoming when it gets closer to release.
 
 
 == Installation
 
-    gem install Mongrel2
+    gem install mongrel2
 
 
 == Contributing

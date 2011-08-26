@@ -1,0 +1,5 @@
+^doc/
+^logs/
+\.sqlite$
+^run/
+.dump$

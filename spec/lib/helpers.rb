@@ -10,9 +10,19 @@ BEGIN {
 	$LOAD_PATH.unshift( libdir.to_s ) unless $LOAD_PATH.include?( libdir.to_s )
 }
 
+begin
+	require 'configurability'
+rescue LoadError => err
+end
+
 require 'rspec'
 require 'mongrel2'
+require 'mongrel2/config'
 require 'spec/lib/constants'
+
+require 'sequel'
+require 'sequel/model'
+require 'sequel/adapters/sqlite'
 
 ### IRb.start_session, courtesy of Joel VanderWerf in [ruby-talk:42437].
 require 'irb'
@@ -48,6 +58,8 @@ module IRB # :nodoc:
 
 	end
 end
+
+
 
 
 ### RSpec helper functions.
@@ -119,6 +131,12 @@ module Mongrel2::SpecHelpers
 		end
 	end
 
+
+	### Set up a Mongrel2 configuration database in memory.
+	def setup_config_db
+		Mongrel2::Config.configure( :configdb => ':memory:' )
+		Mongrel2::Config.initialize_database!
+	end
 
 end
 

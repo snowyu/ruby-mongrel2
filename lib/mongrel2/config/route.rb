@@ -22,6 +22,9 @@ class Mongrel2::Config::Route < Mongrel2::Config( :route )
 	# 		'handler' => 'Mongrel2::Config::HandlerRoute'
 	# 	}
 
+
+	### Fetch the route's target, which is either a Mongrel2::Config::Directory, 
+	### Mongrel2::Config::Proxy, or Mongrel2::Config::Handler object.
 	def target
 		case self.target_type
 		when 'dir'
@@ -33,6 +36,24 @@ class Mongrel2::Config::Route < Mongrel2::Config( :route )
 		else
 			raise ArgumentError, "unknown target type %p" % [ self.target_type ]
 		end
+	end
+
+
+	### Set the target of the route to +object+, which should be one of the classes
+	### returned from #target.
+	def target=( object )
+		case object
+		when Mongrel2::Config::Directory
+			self.target_type = 'dir'
+		when Mongrel2::Config::Proxy
+			self.target_type = 'proxy'
+		when Mongrel2::Config::Handler
+			self.target_type = 'handler'
+		else
+			raise ArgumentError, "unknown target type %p" % [ object.class ]
+		end
+
+		self.target_id = object.id
 	end
 
 end # class Mongrel2::Config::Route

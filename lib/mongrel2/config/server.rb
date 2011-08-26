@@ -22,5 +22,25 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 
 	one_to_many :hosts
 
+
+	### DSL methods for the Server context besides those automatically-generated from its
+	### columns.
+	module DSLMethods
+
+		### Add a Mongrel2::Config::Host to the Server object with the given +hostname+. If a
+		### +block+ is specified, it can be used to further configure the Host.
+		def host( name, &block )
+			self.target.save
+
+			Mongrel2.log.debug "Host [%s] (block: %p)" % [ name, block ]
+			adapter = Mongrel2::Config::DSL::Adapter.new( Mongrel2::Config::Host,
+				:name => name, :matching => name )
+			adapter.instance_eval( &block ) if block
+			self.target.add_host( adapter.target )
+		end
+
+
+	end # module DSLMethods
+
 end # class Mongrel2::Config::Server
 

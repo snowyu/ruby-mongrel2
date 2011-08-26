@@ -15,9 +15,18 @@ module Mongrel2
 	# you'll first need to be familiar with Sequel (http://sequel.rubyforge.org/) and 
 	# especially its Sequel::Model ORM. 
 	#
-	# See the Sequel::Plugins::InlineMigrations module and the documentation for the
-	# 'validation_helpers' and 'subclasses' Sequel plugins.
+	# You will also probably want to refer to the Sequel::Plugins documentation for the 
+	# validation_helpers[http://sequel.rubyforge.org/rdoc-plugins/classes/Sequel/Plugins/ValidationHelpers.html]
+	# and 
+	# subclasses[http://sequel.rubyforge.org/rdoc-plugins/classes/Sequel/Plugins/Subclasses.html]
+	# plugins.
 	# 
+	# == Author/s
+	# * Michael Granger <ged@FaerieMUD.org>
+	#
+	# == References
+	# * http://mongrel2.org/static/mongrel2-manual.html#x1-250003.4
+	#
 	class Config < Sequel::Model
 		include Mongrel2::Loggable
 
@@ -28,6 +37,21 @@ module Mongrel2
 		DEFAULTS = {
 			:configdb => Mongrel2::DEFAULT_CONFIG_URI,
 		}
+
+		# The Pathname of the data directory
+		DATA_DIR = if Gem.datadir( 'mongrel2' )
+				Pathname( Gem.datadir('mongrel2') )
+			else
+				Pathname( __FILE__ ).dirname.parent.parent + 'data/mongrel2'
+			end
+
+		# The Pathname of the SQL file used to create the config database
+		CONFIG_SQL    = DATA_DIR + 'config.sql'
+
+		# The Pathname of the SQL file used to add default mimetypes mappings to the config 
+		# database
+		MIMETYPES_SQL = DATA_DIR + 'mimetypes.sql'
+
 
 		# Register this class as configurable if Configurability is loaded.
 		if defined?( Configurability )
@@ -63,11 +87,52 @@ module Mongrel2
 			return Mongrel2::Config::Server.all
 		end
 
+
+		### Return the contents of the configuration schema SQL file.
+		def self::load_config_schema
+			return CONFIG_SQL.read
+		end
+
+
+		### Return the contents of the mimetypes SQL file.
+		def self::load_mimetypes_sql
+			return MIMETYPES_SQL.read
+		end
+
+
+		### Returns +true+ if the config database has been installed. This currently only
+		### checks to see if the 'server' table exists for the sake of speed.
+		def self::database_initialized?
+			return self.db.table_exists?( :server )
+		end
+
+
+		### Initialize the currently-configured database (if it hasn't been already)
+		def self::init_database
+			return if self.database_initialized?
+			return self.init_database!
+		end
+
+
+		### Initialize the currently-configured database, dropping any existing tables.
+		def self::init_database!
+			sql = self.load_config_schema
+			mimetypes_sql = self.load_mimetypes_sql
+
+			Mongrel2.log.warn "Installing config schema."
+
+			self.db.execute_ddl( sql )
+			self.db.run( mimetypes_sql )
+
+			# Force the associations to reset
+			self.db = db
+		end
+
+
 	end # class Config
 
 
-	### Overridden version of Sequel.Model() that creates subclasses of Mongrel2::Model instead
-	### of Sequel::Model.
+	### Factory method that creates subclasses of Mongrel2::Config.
 	def self::Config( source )
 		unless Sequel::Model::ANONYMOUS_MODEL_CLASSES.key?( source )
 			anonclass = nil
@@ -93,6 +158,8 @@ module Mongrel2
 	require 'mongrel2/config/setting'
 	require 'mongrel2/config/log'
 	require 'mongrel2/config/statistic'
+
+	require 'mongrel2/config/dsl'
 
 end # module Mongrel2
 

@@ -180,6 +180,19 @@ class Mongrel2::M2SHCommand
 	# Commands
 	#
 
+	### The 'init' command
+	def init_command( * )
+		if Mongrel2::Config.database_initialized?
+			abort "Okay, aborting." unless
+				self.prompt.agree( "Are you sure you want to destroy the current config? " )
+		end
+
+		self.prompt.say( self.prompt.color("Initializing #{self.options.config}", :header) )
+		Mongrel2::Config.init_database!
+	end
+	help :init, "Initialize a new config database."
+
+
 	### The 'servers' command
 	def servers_command( * )
 		self.prompt.say( self.prompt.color('SERVERS:', :header) )
