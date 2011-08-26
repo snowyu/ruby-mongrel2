@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# My initial spike to work out how the config DSL might look.
+
 BEGIN {
 	require 'pathname'
 	basedir = Pathname( __FILE__ ).dirname.parent

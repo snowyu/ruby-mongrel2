@@ -4,7 +4,10 @@
 
 == Description
 
-A Mongrel2-specific, middleware-less handler framework for Ruby. 
+A Mongrel2-specific, middleware-less handler framework for Ruby. It includes
+configuration-database ORM classes, a Ruby implementation of the 'm2sh' tool, 
+a configuration DSL, and handler classes you can use to implement Mongrel2 
+applications in Ruby.
 
 More details forthcoming when it gets closer to release.
 
@@ -17,8 +20,8 @@ More details forthcoming when it gets closer to release.
 == Contributing
 
 You can check out the current development source with Mercurial via its
-{Bitbucket project}[https://bitbucket.org/ged/ruby-mongrel2]. Or if you prefer Git, via 
-{its Github mirror}[https://github.com/ged/ruby-mongrel2].
+{Bitbucket project}[https://bitbucket.org/ged/ruby-mongrel2]. Or if you 
+prefer Git, via {its Github mirror}[https://github.com/ged/ruby-mongrel2].
 
 After checking out the source, run:
 

@@ -12,7 +12,6 @@ if Hoe::VERSION == '2.12.0'
 	require 'rspec'
 end
 
-Hoe.plugin :deveiate
 Hoe.plugin :mercurial
 Hoe.plugin :signing
 

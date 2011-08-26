@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+# The mongrel.org config from the manual expressed using the DSL
+# instead of the m2sh config file. Diffs of the database dumps look
+# equivalent except for whitespace, route insertion order (not sure
+# if this matters), and the commit log entry. I'll add commit log
+# stuff soon.
+
 BEGIN {
 	require 'pathname'
 	basedir = Pathname( __FILE__ ).dirname.parent
