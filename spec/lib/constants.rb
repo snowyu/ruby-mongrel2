@@ -20,6 +20,10 @@ module Mongrel2::TestConstants # :nodoc:all
 		#   UUID as the very first thing.
 		TEST_UUID = 'BD17D85C-4730-4BF2-999D-9D2B2E0FCCF9'
 
+		# 0mq socket specifications for Handlers
+		TEST_SEND_SPEC = 'tcp://127.0.0.1:9998'
+		TEST_RECV_SPEC = 'tcp://127.0.0.1:9997'
+
 		# Rule 3: Mongrel2 sends requests with one number right after the
 		#   servers UUID separated by a space. Handlers return a netstring with
 		#   a list of numbers separated by spaces. The numbers indicate the
