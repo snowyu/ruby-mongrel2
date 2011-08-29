@@ -11,5 +11,8 @@ module Mongrel2::Constants
 	# The path to the default Sqlite configuration database
 	DEFAULT_CONFIG_URI = 'config.sqlite'
 
+	# Maximum number of identifiers that can be included in a broadcast response
+	MAX_BROADCAST_IDENTS = 100
+
 end # module Mongrel2::Constants
 

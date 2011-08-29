@@ -32,5 +32,23 @@ module Mongrel2
 	end
 
 
+	# ZMQ::Context (lazy-loaded)
+	@zmq_ctx = nil
+
+	### Fetch the ZMQ::Context for sockets, creating it if necessary.
+	def self::zmq_context
+		if @zmq_ctx.nil?
+			Mongrel2.log.info "Using 0MQ %d.%d.%d" % ZMQ.version
+			@zmq_ctx = ZMQ::Context.new
+		end
+
+		return @zmq_ctx
+	end
+
+
+	require 'mongrel2/connection'
+	require 'mongrel2/request'
+	require 'mongrel2/response'
+
 end # module Mongrel2
 
