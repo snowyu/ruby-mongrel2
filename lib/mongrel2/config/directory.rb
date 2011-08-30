@@ -13,5 +13,39 @@ class Mongrel2::Config::Directory < Mongrel2::Config( :directory )
 	#    default_ctype TEXT,
 	#    cache_ttl INTEGER DEFAULT 0);
 
+	### Sequel validation callback: add errors if the record is invalid.
+	def validate
+		self.validate_base
+		self.validate_index_file
+		self.validate_default_ctype
+		self.validate_cache_ttl
+	end
+
+
+	#########
+	protected
+	#########
+
+	### Validate the 'base' directory which will be served.
+	def validate_base
+		self.validates_presence( :base, :message => "must not be nil" )
+	end
+
+
+	### Validate the 'index_file' attribute.
+	def validate_index_file
+	end
+
+
+	def validate_default_ctype
+	end
+
+
+	def validate_cache_ttl
+	end
+
+
+
+
 end # class Mongrel2::Config::Directory
 

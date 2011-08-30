@@ -3,3 +3,5 @@
 \.sqlite$
 ^run/
 .dump$
+^coverage/
+^spec_tmp/

@@ -13,7 +13,6 @@ module Mongrel2
 
 		### A logging proxy class that wraps calls to the logger into calls that include
 		### the name of the calling class.
-		### @private
 		class ClassNameProxy
 
 			### Create a new proxy for the given +klass+.

@@ -63,3 +63,9 @@ if Rake::Task.task_defined?( '.gemtest' )
 	end
 end
 
+desc "Build a coverage report"
+task :coverage do
+	ENV["COVERAGE"] = 'yes'
+	Rake::Task[:spec].invoke
+end
+

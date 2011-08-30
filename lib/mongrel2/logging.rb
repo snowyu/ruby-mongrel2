@@ -26,14 +26,13 @@ module Mongrel2::Logging
 		super
 
 		class << mod
-			# @return [Logger::Formatter] the log formatter that will be used when the logging 
-			#    subsystem is reset
+			# the log formatter that will be used when the logging subsystem is reset
 			attr_accessor :default_log_formatter
 
-			# @return [Logger] the logger that will be used when the logging subsystem is reset
+			# the logger that will be used when the logging subsystem is reset
 			attr_accessor :default_logger
 
-			# @return [Logger] the logger that's currently in effect
+			# the logger that's currently in effect
 			attr_accessor :logger
 			alias_method :log, :logger
 			alias_method :log=, :logger=
@@ -46,7 +45,6 @@ module Mongrel2::Logging
 
 
 	### Reset the global logger object to the default
-	### @return [void]
 	def reset_logger
 		self.logger = self.default_logger
 		self.logger.level = $DEBUG ? Logger::DEBUG : Logger::WARN
@@ -62,7 +60,6 @@ module Mongrel2::Logging
 
 
 	# A alternate formatter for Logger instances.
-	# @private
 	class Formatter < Logger::Formatter
 
 		# The format to output unless debugging is turned on
@@ -118,7 +115,6 @@ module Mongrel2::Logging
 
 
 	# A ANSI-colorized formatter for Logger instances.
-	# @private
 	class ColorFormatter < Logger::Formatter
 		extend Mongrel2::ANSIColorUtilities
 
@@ -172,7 +168,6 @@ module Mongrel2::Logging
 
 	# An alternate formatter for Logger instances that outputs +div+ HTML
 	# fragments.
-	# @private
 	class HtmlFormatter < Logger::Formatter
 
 		# The default HTML fragment that'll be used as the template for each log message.

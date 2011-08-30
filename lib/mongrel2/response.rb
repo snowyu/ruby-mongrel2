@@ -7,8 +7,7 @@ require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/mixins'
 
 
-# The Mongrel2 Response class. Instances of this class represent a response to a request
-# from an application that will be sent to the Mongrel2 server/s.
+# The Mongrel2 Response base class.
 #
 # == Author/s
 # * Michael Granger <ged@FaerieMUD.org>
@@ -18,6 +17,7 @@ class Mongrel2::Response
 
 	### Create a response to the specified +request+ and return it.
 	def self::from_request( request )
+		Mongrel2.log.debug "Creating a %p to request %p" % [ self, request ]
 		return new( request.sender_id, request.conn_id )
 	end
 

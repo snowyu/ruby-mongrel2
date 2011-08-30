@@ -83,7 +83,7 @@ class Mongrel2::M2SHCommand
 
 
 	### Create and configure a command-line option parser for the command.
-	### @return [Trollop::Parser] the option parser
+	### Returns a Trollop::Parser.
 	def self::make_option_parser
 		progname = File.basename( $0 )
 		default_configdb = Mongrel2::DEFAULT_CONFIG_URI

@@ -24,7 +24,7 @@ class Mongrel2::Control
 	def initialize( port=DEFAULT_PORT )
 		@ctx = Mongrel2.zmq_context
 		@socket = @ctx.socket( ZMQ::REQ )
-		@socket.connect( port )
+		@socket.connect( port.to_s )
 	end
 
 

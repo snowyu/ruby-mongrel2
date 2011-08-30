@@ -46,9 +46,11 @@ module Mongrel2
 	end
 
 
+	require 'mongrel2/exceptions'
 	require 'mongrel2/connection'
 	require 'mongrel2/request'
 	require 'mongrel2/response'
+	require 'mongrel2/control'
 
 end # module Mongrel2
 

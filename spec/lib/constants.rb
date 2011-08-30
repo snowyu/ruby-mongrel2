@@ -32,8 +32,10 @@ module Mongrel2::TestConstants # :nodoc:all
 
 		TEST_ROUTE = '/handler'
 
-		# Rule 4: Requests have the path as a single string followed by a
-		#   space and no paths may have spaces in them.
+		#
+		# HTTP request constants
+		#
+
 		TEST_PATH = "#{TEST_ROUTE}/and/something/else/in/addition"
 		TEST_QUERY = 'thing=foom'
 
@@ -61,6 +63,11 @@ module Mongrel2::TestConstants # :nodoc:all
 		TEST_BODY = ''
 		TEST_BODY_TNETSTRING = TNetstring.dump( TEST_BODY )
 
+
+		#
+		# JSON (JSSocket, etc.) request constants
+		#
+
 		TEST_JSON_PATH = '@directory'
 
 		TEST_JSON_BODY_HEADERS = {
@@ -71,8 +78,12 @@ module Mongrel2::TestConstants # :nodoc:all
 		}
 		TEST_JSON_HEADERS_JSONSTRING = TNetstring.dump( Yajl::Encoder.encode(TEST_JSON_BODY_HEADERS) )
 		TEST_JSON_BODY = { 'type' => 'msg', 'msg' => 'connect' }
-		TEST_JSON_BODY_TNETSTRING = TNetstring.dump( Yajl.dump(TEST_JSON_BODY) )
+		TEST_JSON_BODY_STRING = Yajl.dump( TEST_JSON_BODY )
+		TEST_JSON_BODY_TNETSTRING = TNetstring.dump( TEST_JSON_BODY_STRING )
 
+
+
+		# Freeze all testing constants
 		constants.each do |cname|
 			const_get(cname).freeze
 		end

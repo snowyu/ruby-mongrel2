@@ -10,10 +10,27 @@ BEGIN {
 	$LOAD_PATH.unshift( libdir.to_s ) unless $LOAD_PATH.include?( libdir.to_s )
 }
 
+# SimpleCov test coverage reporting; enable this using the :coverage rake task
+if ENV['COVERAGE']
+	require 'simplecov'
+	SimpleCov.start do
+		add_filter 'spec'
+		add_group "Config Classes" do |file|
+			file.filename =~ %r{/config/}
+		end
+		add_group "Needing tests" do |file|
+			file.covered_percent < 90
+		end
+	end
+end
+
 begin
 	require 'configurability'
 rescue LoadError => err
 end
+
+require 'pathname'
+require 'tmpdir'
 
 require 'rspec'
 require 'mongrel2'
@@ -133,9 +150,96 @@ module Mongrel2::SpecHelpers
 
 
 	### Set up a Mongrel2 configuration database in memory.
-	def setup_config_db
-		Mongrel2::Config.configure( :configdb => ':memory:' )
+	def setup_config_db( dbspec=':memory:' )
+		Mongrel2::Config.configure( :configdb => dbspec )
 		Mongrel2::Config.initialize_database!
+	end
+
+
+
+	### Set up a Mongrel2 server instance.
+	def setup_testing_mongrel_instance( uuid, req_addr, req_spec, res_addr, res_spec='' )
+		spec_tmpdir      = Pathname( Dir.pwd ) + 'spec_tmp'
+		config_db_path   = spec_tmpdir + 'connspec-config.sqlite'
+		m2_rundir        = spec_tmpdir + 'run'
+		m2_tmpdir        = spec_tmpdir + 'tmp'
+		logfile          = spec_tmpdir + 'startup.log'
+
+		logfh = logfile.open( File::WRONLY|File::CREAT|File::APPEND )
+		logfh.puts ">>> Config is: #{config_db_path}"
+
+		m2_rundir.mkpath
+		m2_tmpdir.mkpath
+
+		logfh.puts "Configuring the configdb."
+		Mongrel2::Config.configure( :configdb => config_db_path.to_s )
+		logfh.puts "Forcefully installing the config schema."
+		Mongrel2::Config.init_database!
+
+		# Generate the config (Mongrel2::Config::Server) and store it as a global
+		logfh.print "Generating a config..."
+		server( uuid ) do
+		    name 'ruby-mongrel2 spec config'
+		    chroot( spec_tmpdir.to_s )
+		    access_log '/tmp/access.log'
+		    error_log  '/tmp/error.log'
+		    pid_file '/tmp/mongrel2.pid'
+		    default_host 'localhost'
+		    port 36677
+
+		    host 'localhost' do
+				route '/', directory( '/data/mongrel2' )
+				route '/handler', handler( req_addr, req_spec, res_addr, res_spec )
+			end
+		end
+		logfh.puts "done."
+
+		logfh.puts "About to fork."
+		logfh.flush
+
+		# if pid = fork
+		# 	logfh.close
+		# else
+			Dir.chdir( spec_tmpdir )
+			logfh.puts "About to exec( mongrel2, #{config_db_path.to_s.dump}, #{uuid.dump} )"
+			# $stderr.reopen( logfh )
+			# $stdout.reopen( $stderr )
+			exec( 'mongrel2', config_db_path.to_s, uuid )
+			$stderr.puts "Failed to exec(mongrel2)!"
+			raise "This should only happen if mongrel2 isn't exec()able."
+		# end
+
+		return pid
+	end
+
+
+	### Check to see if the process at +pid+ is alive, returning +true+ if so.
+	def process_is_alive?( pid )
+		Process.kill( 0, pid )
+	rescue Errno::ESRCH
+		Mongrel2.log.info "No such pid #{pid}"
+		false
+	end 
+
+
+	### Stop the Mongrel2 instance running at +pid+, if it's alive, and return either when it's
+	### dead or after three tries.
+	def teardown_testing_mongrel_instance( pid )
+		tries = 0
+
+		while process_is_alive?( @pid ) && tries <= 3
+			Mongrel2.log.info "Signalling PID #@pid..."
+			Process.kill( :TERM, @pid )
+			tries += 1
+
+			Mongrel2.log.info "  waiting..."
+			return true if Process.waitpid( @pid, Process::WNOHANG )
+
+			sleep 0.5
+		end
+
+		Mongrel2.log.info "PID #{@pid} wouldn't die." if tries > 3
+		return false
 	end
 
 end
