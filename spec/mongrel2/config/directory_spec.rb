@@ -43,10 +43,10 @@ describe Mongrel2::Config::Directory do
 		reset_logging()
 	end
 
+
 	it "is valid if its base, index_file, and default_ctype are all valid" do
 		@dir.should be_valid()
 	end
-
 
 	it "isn't valid if it doesn't have a base" do
 		@dir.base = nil
@@ -54,6 +54,28 @@ describe Mongrel2::Config::Directory do
 		@dir.errors.full_messages.first.should =~ /must not be nil/i
 	end
 
+	it "isn't valid if it doesn't have an index file" do
+		@dir.index_file = nil
+		@dir.should_not be_valid()
+		@dir.errors.full_messages.first.should =~ /must not be nil/i
+	end
+
+	it "isn't valid if it doesn't have a default content-type" do
+		@dir.default_ctype = nil
+		@dir.should_not be_valid()
+		@dir.errors.full_messages.first.should =~ /must not be nil/i
+	end
+
+	it "isn't valid if its cache TTL is set to a negative value" do
+		@dir.cache_ttl = -5
+		@dir.should_not be_valid()
+		@dir.errors.full_messages.first.should =~ /not a positive integer/i
+	end
+
+	it "is valid if its cache TTL is set to zero" do
+		@dir.cache_ttl = 0
+		@dir.should be_valid()
+	end
 
 end
 

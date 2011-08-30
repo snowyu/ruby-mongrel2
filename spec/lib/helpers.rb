@@ -188,7 +188,7 @@ module Mongrel2::SpecHelpers
 		    port 36677
 
 		    host 'localhost' do
-				route '/', directory( '/data/mongrel2' )
+				route '/', directory( '/data/mongrel2', 'README.txt' )
 				route '/handler', handler( req_addr, req_spec, res_addr, res_spec )
 			end
 		end
@@ -197,17 +197,17 @@ module Mongrel2::SpecHelpers
 		logfh.puts "About to fork."
 		logfh.flush
 
-		# if pid = fork
-		# 	logfh.close
-		# else
+		if pid = fork
+			logfh.close
+		else
 			Dir.chdir( spec_tmpdir )
 			logfh.puts "About to exec( mongrel2, #{config_db_path.to_s.dump}, #{uuid.dump} )"
-			# $stderr.reopen( logfh )
-			# $stdout.reopen( $stderr )
+			$stderr.reopen( logfh )
+			$stdout.reopen( $stderr )
 			exec( 'mongrel2', config_db_path.to_s, uuid )
 			$stderr.puts "Failed to exec(mongrel2)!"
 			raise "This should only happen if mongrel2 isn't exec()able."
-		# end
+		end
 
 		return pid
 	end

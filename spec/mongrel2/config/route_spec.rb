@@ -40,7 +40,10 @@ describe Mongrel2::Config::Route do
 	end
 
 	it "returns a Mongrel2::Config::Directory if its target_type is 'dir'" do
-		dir = Mongrel2::Config::Directory.create( :base => '/var/www' )
+		dir = Mongrel2::Config::Directory.create(
+		 	:base => '/var/www',
+			:default_ctype => 'text/plain',
+			:index_file => 'index.html' )
 
 		@route.target_type = 'dir'
 		@route.target_id = dir.id

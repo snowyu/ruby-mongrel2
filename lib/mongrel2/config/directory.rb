@@ -34,14 +34,23 @@ class Mongrel2::Config::Directory < Mongrel2::Config( :directory )
 
 	### Validate the 'index_file' attribute.
 	def validate_index_file
+		self.validates_presence( :index_file, :message => "must not be nil" )
 	end
 
 
+	### Validate the index file attribute.
 	def validate_default_ctype
+		self.validates_presence( :default_ctype, :message => "must not be nil" )
 	end
 
 
+	### Validate the cache TTL if one is set.
 	def validate_cache_ttl
+		if self.cache_ttl && Integer( self.cache_ttl ) < 0
+			errmsg = "[%p]: not a positive Integer" % [ self.cache_ttl ]
+			self.log.error( 'cache_ttl' + errmsg )
+			self.errors.add( :cache_ttl, errmsg )
+		end
 	end
 
 

@@ -98,8 +98,8 @@ describe Mongrel2::Config::DSL do
 				host 'brillianttaste' do
 					matching '*.brillianttasteinthefoodmouth.com'
 
-					route '/images', directory( '/var/www/images' )
-					route '/css', directory( '/var/www/css' )
+					route '/images', directory( '/var/www/images', 'index.html', 'image/jpeg' )
+					route '/css', directory( '/var/www/css', 'index.html', 'text/css' )
 					route '/vote', proxy( 'localhost', 6667 )
 					route '/admin', handler(
 						'tcp://127.0.0.1:9998',
@@ -118,7 +118,7 @@ describe Mongrel2::Config::DSL do
 				end
 
 				host 'deveiate.org' do
-					route '', directory( '/usr/local/deveiate/www/public' )
+					route '', directory('/usr/local/deveiate/www/public', 'index.html')
 				end
 
 			end
@@ -209,20 +209,12 @@ describe Mongrel2::Config::DSL do
 		    	route '/', web_app_proxy
 
 				# here's a sample directory 
-				test_directory = directory(
-					'tests/',
-					:index_file => 'index.html',
-					:default_ctype => 'text/plain'
-				)
+				test_directory = directory( 'tests/', 'index.html' )
 
 				route '/tests/', test_directory
 		    	route '/testsmulti/(.*.json)', test_directory
 
-				chat_demo_dir = directory(
-					'examples/chat/static/', 
-					:index_file => 'index.html', 
-					:default_ctype => 'text/plain'
-				)
+				chat_demo_dir = directory( 'examples/chat/static/',  'index.html' )
 
 				route '/chatdemo/', chat_demo_dir
 				route '/static/', chat_demo_dir

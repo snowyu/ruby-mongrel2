@@ -33,7 +33,7 @@ describe Mongrel2::Connection do
 
 
 	before( :all ) do
-		setup_logging( :info )
+		setup_logging( :fatal )
 		@pid = setup_testing_mongrel_instance( TEST_SERVER_UUID, TEST_REQ_ADDR, TEST_REQ_SPEC,
 		                                       TEST_RES_ADDR )
 	end

@@ -23,7 +23,7 @@ module Mongrel2
 	include Mongrel2::Constants
 
 
-	### Get the Treequel version. If +include_buildnum+ is true, the version string will
+	### Get the library version. If +include_buildnum+ is true, the version string will
 	### include the VCS rev ID.
 	def self::version_string( include_buildnum=false )
 		vstring = "%s %s" % [ self.name, VERSION ]

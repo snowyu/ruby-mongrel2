@@ -37,8 +37,8 @@ class Mongrel2::Config::Host < Mongrel2::Config( :host )
 
 		### Create a new Mongrel2::Config::Directory object for the specified +base+ and
 		### return it.
-		def directory( base, opts={} )
-			opts.merge!( :base => base )
+		def directory( base, index_file, default_ctype='text/plain', opts={} )
+			opts.merge!( :base => base, :index_file => index_file, :default_ctype => default_ctype )
 			return Mongrel2::Config::Directory.create( opts )
 		end
 
