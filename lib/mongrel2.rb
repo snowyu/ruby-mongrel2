@@ -9,6 +9,8 @@
 # 
 module Mongrel2
 
+	warn ">>> Mongrel2 requires Ruby 1.9.2 or later. <<<" if RUBY_VERSION < '1.9.2'
+
 	# Library version constant
 	VERSION = '0.0.1'
 

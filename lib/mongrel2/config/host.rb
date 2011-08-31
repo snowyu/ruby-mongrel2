@@ -15,6 +15,7 @@ class Mongrel2::Config::Host < Mongrel2::Config( :host )
 
 	one_to_many :routes
 
+
 	### DSL methods for the Server context besides those automatically-generated from its
 	### columns.
 	module DSLMethods

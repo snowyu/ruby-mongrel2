@@ -14,15 +14,6 @@ class Mongrel2::Config::Route < Mongrel2::Config( :route )
 	#     target_id INTEGER,
 	#     target_type TEXT);
 
-	### Doesn't work; load-order issues?
-	# plugin :single_table_inheritance, :target_type, 
-	# 	:model_map => {
-	# 		'dir' => 'Mongrel2::Config::DirectoryRoute',
-	# 		'proxy' => 'Mongrel2::Config::ProxyRoute',
-	# 		'handler' => 'Mongrel2::Config::HandlerRoute'
-	# 	}
-
-
 	### Fetch the route's target, which is either a Mongrel2::Config::Directory, 
 	### Mongrel2::Config::Proxy, or Mongrel2::Config::Handler object.
 	def target
