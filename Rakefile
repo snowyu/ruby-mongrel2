@@ -33,7 +33,7 @@ hoespec = Hoe.spec 'Mongrel2' do
 	self.dependency 'rspec',     '~> 2.4', :developer
 
 	self.spec_extras[:licenses] = ["BSD"]
-	self.require_ruby_version( '>=1.8.7' )
+	self.require_ruby_version( '>= 1.9.2' )
 
 	self.rdoc_locations << "deveiate:/usr/local/www/public/code/#{remote_rdoc_dir}"
 end

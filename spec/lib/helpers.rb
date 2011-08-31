@@ -165,11 +165,11 @@ module Mongrel2::SpecHelpers
 		m2_tmpdir        = spec_tmpdir + 'tmp'
 		logfile          = spec_tmpdir + 'startup.log'
 
-		logfh = logfile.open( File::WRONLY|File::CREAT|File::APPEND )
-		logfh.puts ">>> Config is: #{config_db_path}"
-
 		m2_rundir.mkpath
 		m2_tmpdir.mkpath
+
+		logfh = logfile.open( File::WRONLY|File::CREAT|File::APPEND )
+		logfh.puts ">>> Config is: #{config_db_path}"
 
 		logfh.puts "Configuring the configdb."
 		Mongrel2::Config.configure( :configdb => config_db_path.to_s )
