@@ -24,13 +24,15 @@ hoespec = Hoe.spec 'Mongrel2' do
 
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
-	self.dependency 'sequel',     '~> 3.26.0'
-	self.dependency 'sqlite3',    '~> 1.3.4'
-	self.dependency 'zmq',        '~> 2.1.3'
-	self.dependency 'yajl-ruby',  '~> 0.8.3'
-	self.dependency 'tnetstring', '~> 0.3.4'
+	self.dependency 'nokogiri',   '~> 1.5'
+	self.dependency 'sequel',     '~> 3.26'
+	self.dependency 'sqlite3',    '~> 1.3'
+	self.dependency 'tnetstring', '~> 0.3'
+	self.dependency 'yajl-ruby',  '~> 0.8'
+	self.dependency 'zmq',        '~> 2.1.3.1'
 
-	self.dependency 'rspec',     '~> 2.4', :developer
+	self.dependency 'configurability', '~> 1.0', :developer
+	self.dependency 'rspec',           '~> 2.4', :developer
 
 	self.spec_extras[:licenses] = ["BSD"]
 	self.require_ruby_version( '>= 1.9.2' )

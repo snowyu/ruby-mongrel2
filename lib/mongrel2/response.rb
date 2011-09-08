@@ -15,6 +15,11 @@ require 'mongrel2/mixins'
 class Mongrel2::Response
 	include Mongrel2::Loggable
 
+	# The default number of bytes of the response body to send to the mongrel2
+	# server at a time.
+	DEFAULT_CHUNKSIZE = 1024 * 512
+
+
 	### Create a response to the specified +request+ and return it.
 	def self::from_request( request )
 		Mongrel2.log.debug "Creating a %p to request %p" % [ self, request ]
@@ -23,10 +28,16 @@ class Mongrel2::Response
 
 
 	### Create a new Response object for the specified +sender_id+, +conn_id+, and +body+.
-	def initialize( sender_id, conn_id, body='' )
+	def initialize( sender_id, conn_id, body='', headers={} )
+		if body.is_a?( Hash )
+			headers = body
+			body = ''
+		end
+
 		@sender_id = sender_id
 		@conn_id   = conn_id
 		@body      = body
+		@headers   = Mongrel2::Table.new( headers )
 	end
 
 
@@ -42,11 +53,26 @@ class Mongrel2::Response
 	# the response will be routed to by the mongrel2 server
 	attr_accessor :conn_id
 
+	# The response headers (a Mongrel2::Table)
+	attr_reader :headers
 
-	### Return the Stringified body of the response. Overridden by subclasses
-	### to include headers, etc.
-	def body
-		return @body
+	# The body of the response
+	attr_accessor :body
+
+
+	### Append the given +object+ to the response body. Returns the response for
+	### chaining.
+	def <<( object )
+		self.body << object
+		return self
+	end
+
+
+	### Write the given +objects+ to the response body, calling #to_s on each one.
+	def puts( *objects )
+		objects.each do |obj|
+			self << obj.to_s
+		end
 	end
 
 end # class Mongrel2::Response

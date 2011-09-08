@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'pp'
+require 'shellwords'
+
 require 'trollop'
 require 'highline'
-require 'shellwords'
 
 # Have to do it this way to avoid the vendored 'sysexits' under OSX.
 gem 'sysexits'
@@ -13,7 +14,7 @@ require 'mongrel2'
 require 'mongrel2/config'
 
 
-# A tool for displaying information about a directory's records and schema artifacts.
+# A tool for interacting with a Mongrel2 config database and server
 class Mongrel2::M2SHCommand
 	extend ::Sysexits
 	include Sysexits,

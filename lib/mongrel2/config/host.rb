@@ -53,17 +53,28 @@ class Mongrel2::Config::Host < Mongrel2::Config( :host )
 
 		### Create a new Mongrel2::Config::Handler object with the specified +send_spec+, 
 		### +send_ident+, +recv_spec+, +recv_ident+, and +options+ and return it.
-		def handler( send_spec, send_ident, recv_spec, recv_ident='', options={} )
-			# Shift the opts hash over if the recv_ident was omitted
-			if recv_ident.is_a?( Hash )
+		def handler( send_spec, send_ident, recv_spec=nil, recv_ident='', options={} )
+			# Shift the opts hash over if the other optional args were omitted
+			if recv_spec.is_a?( Hash )
+				options = recv_spec
+				recv_spec = nil
+			elsif recv_ident.is_a?( Hash )
 				options = recv_ident
 				recv_ident = ''
 			end
 
+			# Default to one port below the request spec
+			unless recv_spec
+				port = send_spec[ /:(\d+)$/, 1 ] or
+					"Can't guess default port for a send_spec without one (%p)" % [ send_spec ]
+				recv_spec = URI( send_spec )
+				recv_spec.port = port.to_i - 1
+			end
+
 			options.merge!(
-				:send_spec  => send_spec,
+				:send_spec  => send_spec.to_s,
 				:send_ident => send_ident,
-				:recv_spec  => recv_spec,
+				:recv_spec  => recv_spec.to_s,
 				:recv_ident => recv_ident
 			)
 

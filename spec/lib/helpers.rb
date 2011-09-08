@@ -7,6 +7,7 @@ BEGIN {
 
 	libdir = basedir + "lib"
 
+	$LOAD_PATH.unshift( basedir.to_s ) unless $LOAD_PATH.include?( basedir.to_s )
 	$LOAD_PATH.unshift( libdir.to_s ) unless $LOAD_PATH.include?( libdir.to_s )
 }
 
@@ -35,11 +36,13 @@ require 'tmpdir'
 require 'rspec'
 require 'mongrel2'
 require 'mongrel2/config'
-require 'spec/lib/constants'
 
 require 'sequel'
 require 'sequel/model'
 require 'sequel/adapters/sqlite'
+
+require 'spec/lib/constants'
+require 'spec/lib/matchers'
 
 ### IRb.start_session, courtesy of Joel VanderWerf in [ruby-talk:42437].
 require 'irb'
@@ -242,6 +245,80 @@ module Mongrel2::SpecHelpers
 		return false
 	end
 
+
+	### Normalize and fill in missing members for the given +opts+.
+	def normalize_headers( opts, defaults=TEST_HEADERS )
+		headers = defaults.merge( opts[:headers] || {} )
+
+		headers["PATH"]    = opts[:path]
+		headers["URI"]     = "#{opts[:path]}?#{opts[:query]}"
+		headers["QUERY"]   = opts[:query]
+		headers["PATTERN"] = opts[:pattern] || opts[:path]
+
+		return headers
+	end
+
+
+	### Make a raw Mongrel2 request from the specified +opts+ and return it as a String.
+	def make_request( opts={} )
+		headers = normalize_headers( opts )
+		opts = TEST_REQUEST_OPTS.merge( opts )
+
+		headerstring = TNetstring.dump( Yajl::Encoder.encode(headers) )
+		bodystring = TNetstring.dump( opts[:body] || '' )
+
+		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
+		return "%s %d %s %s%s" % [
+			opts[:uuid],
+			opts[:id],
+			opts[:path],
+			headerstring,
+			bodystring,
+		]
+	end
+
+
+	### Make a new-style (TNetstring headers) raw Mongrel2 request from the specified +opts+ 
+	### and return it as a String.
+	def make_tn_request( opts={} )
+		opts = TEST_REQUEST_OPTS.merge( opts )
+		headers = normalize_headers( opts )
+
+		headerstring = TNetstring.dump( headers )
+		bodystring = TNetstring.dump( opts[:body] || '' )
+
+		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
+		return "%s %d %s %s%s" % [
+			opts[:uuid],
+			opts[:id],
+			opts[:path],
+			headerstring,
+			bodystring,
+		]
+	end
+
+
+	### Make a Mongrel2 request for a JSON route.
+	def make_json_request( opts={} )
+		opts = TEST_JSON_REQUEST_OPTS.merge( opts )
+		headers = normalize_headers( opts, TEST_JSON_HEADERS )
+		headers.delete( 'URI' ) # JSON requests don't have one
+
+		Mongrel2.log.debug "JSON request, headers = %p, opts = %p" % [ headers, opts ]
+
+		headerstring = TNetstring.dump( Yajl::Encoder.encode(headers) )
+		bodystring = TNetstring.dump( Yajl::Encoder.encode(opts[:body] || []) )
+
+		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
+		return "%s %d %s %s%s" % [
+			opts[:uuid],
+			opts[:id],
+			opts[:path],
+			headerstring,
+			bodystring,
+		]
+	end
+
 end
 
 
@@ -256,11 +333,7 @@ RSpec.configure do |c|
 	c.extend( Mongrel2::TestConstants )
 	c.include( Mongrel2::TestConstants )
 	c.include( Mongrel2::SpecHelpers )
-
-	c.filter_run_excluding( :ruby_1_8_only => true ) if
-		Mongrel2::SpecHelpers.vvec( RUBY_VERSION ) >= Mongrel2::SpecHelpers.vvec('1.9.1')
-	c.filter_run_excluding( :mri_only => true ) if
-		defined?( RUBY_ENGINE ) && RUBY_ENGINE != 'ruby'
+	c.include( Mongrel2::Matchers )
 end
 
 # vim: set nosta noet ts=4 sw=4:

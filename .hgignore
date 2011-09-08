@@ -5,3 +5,4 @@
 .dump$
 ^coverage/
 ^spec_tmp/
+\.log$

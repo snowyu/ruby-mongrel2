@@ -33,7 +33,7 @@ describe Mongrel2::Config::Directory do
 
 	before( :each ) do
 		@dir = Mongrel2::Config::Directory.new(
-			:base          => '/var/www/public',
+			:base          => 'var/www/public/',
 			:index_file    => 'index.html',
 			:default_ctype => 'text/plain'
 		)
@@ -51,7 +51,19 @@ describe Mongrel2::Config::Directory do
 	it "isn't valid if it doesn't have a base" do
 		@dir.base = nil
 		@dir.should_not be_valid()
-		@dir.errors.full_messages.first.should =~ /must not be nil/i
+		@dir.errors.full_messages.first.should =~ /missing or nil/i
+	end
+
+	it "isn't valid when its base starts with '/'" do
+		@dir.base = '/var/www/public/'
+		@dir.should_not be_valid()
+		@dir.errors.full_messages.first.should =~ %r{shouldn't start with '/'}i
+	end
+
+	it "isn't valid when its base doesn't end with '/'" do
+		@dir.base = 'var/www/public'
+		@dir.should_not be_valid()
+		@dir.errors.full_messages.first.should =~ %r{must end with '/'}i
 	end
 
 	it "isn't valid if it doesn't have an index file" do

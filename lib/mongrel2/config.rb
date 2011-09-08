@@ -74,9 +74,10 @@ module Mongrel2
 		### be a Sequel::Database.
 		def self::db=( newdb )
 			super
-			self.descendents.each do |subclass|
-				Mongrel2.log.info "Resetting database connection for: %p to: %p" % [ subclass, newdb ]
-				subclass.db = newdb
+			if self == Mongrel2::Config
+				Mongrel2.log.debug "Resetting database connection for %d config classes to: %p" %
+					[ self.descendents.length, newdb ]
+				self.descendents.each {|subclass| subclass.db = newdb }
 			end
 		end
 
@@ -156,6 +157,7 @@ module Mongrel2
 	require 'mongrel2/config/route'
 	require 'mongrel2/config/server'
 	require 'mongrel2/config/setting'
+	require 'mongrel2/config/mimetype'
 	require 'mongrel2/config/log'
 	require 'mongrel2/config/statistic'
 

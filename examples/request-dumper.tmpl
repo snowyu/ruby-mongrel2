@@ -1,0 +1,71 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title><?attr title ?></title>
+  <meta name="description" content="Ruby-Mongrel2 request introspection handler">
+  <meta name="author" content="Michael Granger">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <header>
+	<h1>Request Dump (0x<?call "%0x" % request.object_id ?>)</h1>
+  </header>
+
+  <section id="dump">
+		
+		<table>
+			<tr>
+				<th>Sender ID</th>
+				<td><?escape request.sender_id ?></td>
+			</tr>
+			<tr>
+				<th>Connection ID</th>
+				<td><?escape request.conn_id.to_s ?></td>
+			</tr>
+		</table>
+		
+		<section id="headers">
+			<header>
+				<h1>Headers</h1>
+			</header>
+			<table>
+				<?for name, val in request.headers.each_header.each ?>
+				<tr>
+					<th><?attr name ?></th>
+					<td><?attr val ?></td>
+				</tr>
+				<?end for ?>
+			</table>
+		</section>
+		
+		<section id="body">
+			<header>
+				<h1>Body</h1>
+			</header>
+
+			<p><code><?escape request.body.dump ?></code></p>
+		</section>
+
+		<section id="inspect">
+			<header>
+				<h1>Inspected Request</h1>
+				<p><tt>
+					<?pp request ?>
+				</tt></p>
+			</header>
+		</section>
+		
+  </section>
+
+  <footer>
+	<p><tt>$Id$</tt></p>
+  </footer>
+
+</body>
+</html>

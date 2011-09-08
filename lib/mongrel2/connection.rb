@@ -26,19 +26,17 @@ class Mongrel2::Connection
 		@sub_addr = sub_addr
 		@pub_addr = pub_addr
 
-		ctx = Mongrel2.zmq_context
-
-		self.log.info "Connecting request socket (%s)" % [ @sub_addr ]
-		@request_sock  = ctx.socket( ZMQ::PULL )
-		@request_sock.connect( @sub_addr )
-
-		self.log.info "Connecting response socket (%s)" % [ @pub_addr ]
-		@response_sock  = ctx.socket( ZMQ::PUB )
-		@response_sock.setsockopt( ZMQ::IDENTITY, @app_id )
-		@response_sock.connect( @pub_addr )
-
+		@request_sock = @response_sock = nil
 		@closed = false
 	end
+
+
+	### Copy constructor -- don't keep the +original+'s sockets or closed state.
+	def initialize_copy( original )
+		@request_sock = @response_sock = nil
+		@closed = false
+	end
+
 
 
 	######
@@ -54,14 +52,39 @@ class Mongrel2::Connection
 	# The connection's publication (response) socket address
 	attr_reader :pub_addr
 
-	# The ZMQ::PULL socket for incoming requests
-	attr_reader :request_sock
 
-	# The ZMQ::PUB socket for outgoing responses
-	attr_reader :response_sock
+	### Establish both connections to the Mongrel2 server.
+	def connect
+		ctx = Mongrel2.zmq_context
+		self.log.debug "0mq Context is: %p" % [ ctx ]
 
-	# True if the Connection to the Mongrel2 server has been closed.
-	attr_writer :closed
+		self.log.info "Connecting request socket (%s)" % [ @sub_addr ]
+		@request_sock  = ctx.socket( ZMQ::PULL )
+		@request_sock.connect( @sub_addr )
+
+		self.log.info "Connecting response socket (%s)" % [ @pub_addr ]
+		@response_sock  = ctx.socket( ZMQ::PUB )
+		@response_sock.setsockopt( ZMQ::IDENTITY, @app_id )
+		@response_sock.connect( @pub_addr )
+	end
+
+
+	### Fetch the ZMQ::PULL socket for incoming requests, establishing the
+	### connection to Mongrel if it hasn't been already.
+	def request_sock
+		self.check_closed
+		self.connect unless @request_sock
+		return @request_sock
+	end
+
+
+	### Fetch the ZMQ::PUB socket for outgoing responses, establishing the
+	### connection to Mongrel if it hasn't been already.
+	def response_sock
+		self.check_closed
+		self.connect unless @response_sock
+		return @response_sock
+	end
 
 
 	### Fetch the next request from the server as raw TNetString data.
@@ -85,18 +108,16 @@ class Mongrel2::Connection
 	### Write a raw +data+ to the given connection ID (+conn_id+) at the given +sender_id+.
 	def send( sender_id, conn_id, data )
 		self.check_closed
-
-		conn_id = conn_id.to_s
-        header = "%s %d:%s," % [ sender_id, conn_id.length, conn_id ]
-
-		self.log.debug "Sending: %p" % [ header + ' ' + data ]
-        self.response_sock.send( header + ' ' + data )
+        header = "%s %d:%s," % [ sender_id, conn_id.to_s.length, conn_id ]
+		buf = header + ' ' + data
+		self.log.debug "Sending response: %p" % [ buf ]
+		self.response_sock.send( buf )
 	end
 
 
 	### Write the specified +response+ (Mongrel::Response object) to the requester.
 	def reply( response )
-		self.send( response.sender_id, response.conn_id, response.body )
+		self.send( response.sender_id, response.conn_id, response.to_s )
 	end
 
 
@@ -126,21 +147,29 @@ class Mongrel2::Connection
 	def close
 		return if self.closed?
 		self.closed = true
-		self.request_sock.close
-		self.response_sock.close
-	end
-
-
-	### Check to be sure the Connection hasn't been closed, raising a Mongrel2::ConnectionError
-	### if it has.
-	def check_closed
-		raise Mongrel2::ConnectionError, "operation on closed Connection" if self.closed?
+		@request_sock.close if @request_sock
+		@response_sock.close if @response_sock
 	end
 
 
 	### Returns +true+ if the connection to the Mongrel2 server has been closed.
 	def closed?
 		return @closed
+	end
+
+
+	#########
+	protected
+	#########
+
+	# True if the Connection to the Mongrel2 server has been closed.
+	attr_writer :closed
+
+
+	### Check to be sure the Connection hasn't been closed, raising a Mongrel2::ConnectionError
+	### if it has.
+	def check_closed
+		raise Mongrel2::ConnectionError, "operation on closed Connection" if self.closed?
 	end
 
 end # class Mongrel2::Connection

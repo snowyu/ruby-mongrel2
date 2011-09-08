@@ -57,7 +57,12 @@ describe Mongrel2::Connection do
 	end
 
 
-	it "connects to the endpoints specified when it's created" do
+	it "doesn't connect to the endpoints when it's created" do
+		@conn.instance_variable_get( :@request_sock ).should be_nil()
+		@conn.instance_variable_get( :@response_sock ).should be_nil()
+	end
+
+	it "connects to the endpoints specified on demand" do
 		@conn.request_sock.should be_a( ZMQ::Socket )
 		@conn.response_sock.should be_a( ZMQ::Socket )
 	end
@@ -67,6 +72,22 @@ describe Mongrel2::Connection do
 		expect {
 			@conn.recv
 		}.to raise_error( Mongrel2::ConnectionError, /operation on closed connection/i )
+	end
+
+	it "doesn't keep its request and response sockets when duped" do
+		@conn.connect
+		duplicate = @conn.dup
+
+		duplicate.instance_variable_get( :@request_sock ).
+			should_not equal( @conn.instance_variable_get(:@request_sock) )
+		duplicate.instance_variable_get( :@response_sock ).
+			should_not equal( @conn.instance_variable_get(:@response_sock) )
+	end
+
+	it "doesn't keep its closed state when duped" do
+		@conn.close
+		duplicate = @conn.dup
+		duplicate.should_not be_closed()
 	end
 
 end

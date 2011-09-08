@@ -9,7 +9,7 @@
 # 
 module Mongrel2
 
-	warn ">>> Mongrel2 requires Ruby 1.9.2 or later. <<<" if RUBY_VERSION < '1.9.2'
+	abort "\n\n>>> Mongrel2 requires Ruby 1.9.2 or later. <<<\n\n" if RUBY_VERSION < '1.9.2'
 
 	# Library version constant
 	VERSION = '0.0.1'
@@ -51,6 +51,9 @@ module Mongrel2
 	require 'mongrel2/exceptions'
 	require 'mongrel2/connection'
 	require 'mongrel2/request'
+	require 'mongrel2/httprequest'
+	require 'mongrel2/jsonrequest'
+	require 'mongrel2/xmlrequest'
 	require 'mongrel2/response'
 	require 'mongrel2/control'
 

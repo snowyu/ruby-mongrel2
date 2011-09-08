@@ -1,0 +1,17 @@
+#!/bin/sh
+
+examplesdir=$(dirname $0)
+
+echo "Creating the config database..."
+ruby -rubygems -Ilib $examplesdir/config.rb
+
+echo "Starting Mongrel2..."
+m2sh start -db examples.sqlite -host localhost &
+
+echo "Starting the 'helloworld' handler..."
+ruby -rubygems -Ilib $examplesdir/helloworld-handler.rb &
+
+echo "Starting the request dumper..."
+ruby -rubygems -Ilib $examplesdir/request-dumper.rb &
+
+echo "Okay, now point a browser to http://localhost:8113/."

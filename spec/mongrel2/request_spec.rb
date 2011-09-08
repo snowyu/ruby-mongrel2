@@ -37,15 +37,7 @@ describe Mongrel2::Request do
 
 	it "can parse a request message" do
 
-		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
-		message = "%s %d %s %s%s" % [
-			TEST_UUID,
-			TEST_ID,
-			TEST_PATH,
-			TEST_HEADERS_JSONSTRING,
-			TEST_BODY_TNETSTRING,
-		]
-
+		message = make_request()
 		req = Mongrel2::Request.parse( message )
 
 		req.should be_a( Mongrel2::Request )
@@ -58,15 +50,7 @@ describe Mongrel2::Request do
 
 	it "can parse a request message with TNetstring headers" do
 
-		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
-		message = "%s %d %s %s%s" % [
-			TEST_UUID,
-			TEST_ID,
-			TEST_PATH,
-			TEST_HEADERS_TNETSTRING,
-			TEST_BODY_TNETSTRING,
-		]
-
+		message = make_tn_request()
 		req = Mongrel2::Request.parse( message )
 
 		req.should be_a( Mongrel2::Request )
@@ -79,44 +63,37 @@ describe Mongrel2::Request do
 
 	it "can parse a request message with a JSON body" do
 
-		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
-		message = "%s %d %s %s%s" % [
-			TEST_UUID,
-			TEST_ID,
-			TEST_JSON_PATH,
-			TEST_JSON_HEADERS_JSONSTRING,
-			TEST_JSON_BODY_TNETSTRING,
-		]
-
+		message = make_json_request()
 		req = Mongrel2::Request.parse( message )
 
-		req.should be_a( Mongrel2::Request )
+		req.should be_a( Mongrel2::JSONRequest )
 		req.sender_id.should == TEST_UUID
 		req.conn_id.should == TEST_ID
 
 		req.headers.should be_a( Mongrel2::Table )
-		req.headers.path.should == TEST_JSON_BODY_HEADERS['PATH']
+		req.headers.path.should == TEST_JSON_PATH
 
-		req.body.should == TEST_JSON_BODY_STRING
+		req.data.should == TEST_JSON_BODY
+	end
+
+	it "raises an UnhandledMethodError with the name of the method for METHOD verbs that " +
+	   "don't look like HTTP ones" do
+
+		message = make_request( :headers => {'METHOD' => '!DIVULGE'} )
+		expect {
+			Mongrel2::Request.parse( message )
+		}.to raise_error( Mongrel2::UnhandledMethodError, /!DIVULGE/ )
 	end
 
 
 	describe "instances" do
 
 		before( :each ) do
-			# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
-			message = "%s %d %s %s%s" % [
-				TEST_UUID,
-				TEST_ID,
-				TEST_PATH,
-				TEST_HEADERS_JSONSTRING,
-				TEST_BODY_TNETSTRING,
-			]
-
+			message = make_json_request() # HTTPRequest overrides the #response method
 			@req = Mongrel2::Request.parse( message )
 		end
 
-		it "can return a Mongrel2::Response that is pre-configured to response to themselves" do
+		it "can return an appropriate response instance for themselves" do
 			result = @req.response
 			result.should be_a( Mongrel2::Response )
 			result.sender_id.should == @req.sender_id
@@ -129,6 +106,7 @@ describe Mongrel2::Request do
 	describe "framework support" do
 
 		before( :all ) do
+			@oldtypes = Mongrel2::Request.request_types
 			@original_default_proc = Mongrel2::Request.request_types.default_proc
 		end
 
@@ -139,7 +117,7 @@ describe Mongrel2::Request do
 
 		after( :all ) do
 			Mongrel2::Request.request_types.default_proc = @original_default_proc
-			Mongrel2::Request.request_types.clear
+			Mongrel2::Request.request_types.replace( @oldtypes )
 		end
 
 

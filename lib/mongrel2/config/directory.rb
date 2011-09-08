@@ -28,7 +28,25 @@ class Mongrel2::Config::Directory < Mongrel2::Config( :directory )
 
 	### Validate the 'base' directory which will be served.
 	def validate_base
-		self.validates_presence( :base, :message => "must not be nil" )
+		if self.base
+			if self.base.start_with?( '/' )
+				errmsg = "[%p]: shouldn't start with '/'; that will fail when not in chroot." %
+					[ self.base ]
+				self.log.error( 'base ' + errmsg )
+				self.errors.add( :base, errmsg )
+			end
+
+			unless self.base.end_with?( '/' )
+				errmsg = "[%p]: must end with '/' or it won't work right." %
+					[ self.base ]
+				self.log.error( 'base ' + errmsg )
+				self.errors.add( :base, errmsg )
+			end
+		else
+			errmsg = "missing or nil"
+			self.log.error( 'base ' + errmsg )
+			self.errors.add( :base, errmsg )
+		end
 	end
 
 

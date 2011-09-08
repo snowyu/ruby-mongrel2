@@ -41,7 +41,7 @@ module Mongrel2::Config::DSL
 		### Add a declarative singleton method for the columns of the +adapted_object+.
 		def decorate_with_column_declaratives( adapted_object )
 			columns = adapted_object.columns
-			self.log.debug "  decorating for columns: %s" % [ columns.sort.join(', ') ]
+			self.log.debug "  decorating for columns: %s" % [ columns.map( &:to_s ).sort.join(', ') ]
 
 			columns.each do |colname|
 
@@ -56,7 +56,6 @@ module Mongrel2::Config::DSL
 				end
 
 				# Install the method
-				self.log.debug "    adding method for %s" % [ colname ]
 				self.singleton_class.send( :define_method, colname, &method_body )
 			end
 		end

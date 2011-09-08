@@ -93,11 +93,13 @@ class Mongrel2::Table
 	end
 
 
-	### Iterate over the table contents yielding each as an RFC822 header.
+	### Enumerator for iterating over the table contents, yielding each as an RFC822 header.
 	def each_header
-		@hash.each do |header, value|
-			Array( value ).each do |val|
-				yield( normalize_header(header), val.to_s )
+		return Enumerator.new do |yielder|
+			@hash.each do |header, value|
+				Array( value ).each do |val|
+					yielder.yield( normalize_header(header), val.to_s )
+				end
 			end
 		end
 	end

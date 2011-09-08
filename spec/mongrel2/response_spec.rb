@@ -46,5 +46,18 @@ describe Mongrel2::Response do
 	end
 
 
+	context	"an instance with default values" do
+
+		before( :each ) do
+			@response = Mongrel2::Response.new( TEST_UUID, 8 )
+		end
+
+		it "has a headers table" do
+			@response.headers.should be_a( Mongrel2::Table )
+			@response.headers.should be_empty()
+		end
+
+	end
+
 end
 

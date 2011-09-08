@@ -29,6 +29,15 @@ class Mongrel2::Config::Handler < Mongrel2::Config( :handler )
 	VALID_PROTOCOLS = %w[json tnetstring]
 
 
+	##
+	# :method: by_send_ident( uuid )
+	# 
+	# Look up a Handler by its send_ident, which should be a +uuid+ or similar String.
+	def_dataset_method( :by_send_ident ) do |ident|
+		filter( :send_ident => ident )
+	end
+
+
 	### Validate the object prior to saving it.
 	def validate
 		self.validate_idents

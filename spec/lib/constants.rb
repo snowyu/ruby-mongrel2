@@ -30,17 +30,15 @@ module Mongrel2::TestConstants # :nodoc:all
 		#   connected browser the message is to/from.
 		TEST_ID = 8
 
-		TEST_ROUTE = '/handler'
-
 		#
 		# HTTP request constants
 		#
 
-		TEST_PATH = "#{TEST_ROUTE}/and/something/else/in/addition"
+		TEST_ROUTE = '/handler'
+		TEST_PATH  = TEST_ROUTE
 		TEST_QUERY = 'thing=foom'
 
-		TEST_HEADERS       = {
-			"PATH"            => TEST_PATH,
+		TEST_HEADERS = {
 			"x-forwarded-for" => "127.0.0.1",
 			"accept-language" => "en-US,en;q=0.8",
 			"accept-encoding" => "gzip,deflate,sdch",
@@ -53,15 +51,16 @@ module Mongrel2::TestConstants # :nodoc:all
 			"host"            => "localhost:3667",
 			"METHOD"          => "GET",
 			"VERSION"         => "HTTP/1.1",
-			"URI"             => "#{TEST_PATH}?#{TEST_QUERY}",
-			"QUERY"           => TEST_QUERY,
-			"PATTERN"         => TEST_ROUTE,
 		}
-		TEST_HEADERS_TNETSTRING = TNetstring.dump( TEST_HEADERS )
-		TEST_HEADERS_JSONSTRING = TNetstring.dump( Yajl::Encoder.encode(TEST_HEADERS) )
 
 		TEST_BODY = ''
-		TEST_BODY_TNETSTRING = TNetstring.dump( TEST_BODY )
+
+		TEST_REQUEST_OPTS = {
+			:uuid    => TEST_UUID,
+			:id      => TEST_ID,
+			:path    => TEST_PATH,
+			:body    => TEST_BODY,
+		}
 
 
 		#
@@ -70,17 +69,20 @@ module Mongrel2::TestConstants # :nodoc:all
 
 		TEST_JSON_PATH = '@directory'
 
-		TEST_JSON_BODY_HEADERS = {
+		TEST_JSON_HEADERS = {
 			'PATH'            => TEST_JSON_PATH,
 			'x-forwarded-for' => "127.0.0.1",
 			'METHOD'          => "JSON",
 			'PATTERN'         => TEST_JSON_PATH,
 		}
-		TEST_JSON_HEADERS_JSONSTRING = TNetstring.dump( Yajl::Encoder.encode(TEST_JSON_BODY_HEADERS) )
 		TEST_JSON_BODY = { 'type' => 'msg', 'msg' => 'connect' }
-		TEST_JSON_BODY_STRING = Yajl.dump( TEST_JSON_BODY )
-		TEST_JSON_BODY_TNETSTRING = TNetstring.dump( TEST_JSON_BODY_STRING )
 
+		TEST_JSON_REQUEST_OPTS = {
+			:uuid    => TEST_UUID,
+			:id      => TEST_ID,
+			:path    => TEST_JSON_PATH,
+			:body    => TEST_JSON_BODY,
+		}
 
 
 		# Freeze all testing constants

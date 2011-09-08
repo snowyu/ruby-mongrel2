@@ -33,6 +33,7 @@ while running
 	$stderr.puts "Got request: %p" % [ req ]
 
 	res = req.response
+	res.status = 200
 	res.headers.content_type = 'text/plain'
 	res.body = "Hi there!"
 
