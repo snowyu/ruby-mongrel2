@@ -5,7 +5,7 @@ require 'pathname'
 require 'mongrel2' unless defined?( Mongrel2 )
 
 
-### A collection of constants that are shared across the library
+# A collection of constants that are shared across the library
 module Mongrel2::Constants
 
 	# The path to the default Sqlite configuration database

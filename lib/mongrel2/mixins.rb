@@ -8,11 +8,11 @@ require 'mongrel2/constants'
 
 module Mongrel2
 
-	### Add logging to a Mongrel2 class. Including classes get #log and #log_debug methods.
+	# Add logging to a Mongrel2 class. Including classes get #log and #log_debug methods.
 	module Loggable
 
-		### A logging proxy class that wraps calls to the logger into calls that include
-		### the name of the calling class.
+		# A logging proxy class that wraps calls to the logger into calls that include
+		# the name of the calling class.
 		class ClassNameProxy
 
 			### Create a new proxy for the given +klass+.
@@ -73,7 +73,7 @@ module Mongrel2
 
 	end # module Loggable
 
-	### A collection of ANSI color utility functions
+	# A collection of ANSI color utility functions
 	module ANSIColorUtilities
 
 		# Set some ANSI escape code constants (Shamelessly stolen from Perl's

@@ -7,13 +7,10 @@ require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/mixins'
 
 
-# The Mongrel2 connection class. Connections objects serve as a front end for 
+# The Mongrel2 connection class. Connection objects serve as a front end for 
 # the ZMQ sockets which talk to the mongrel2 server/s for your handler. It receives 
-# raw or JSON-encoded requests and wraps Mongrel2::Request objects around them, and
-# then ships Mongrel2::Response objects back to the server.
-#
-# == Author/s
-# * Michael Granger <ged@FaerieMUD.org>
+# TNetString requests and wraps Mongrel2::Request objects around them, and
+# then encodes and sends Mongrel2::Response objects back to the server.
 #
 # == References
 # * http://mongrel2.org/static/mongrel2-manual.html#x1-700005.3

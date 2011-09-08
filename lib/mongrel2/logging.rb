@@ -7,6 +7,7 @@ require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/mixins'
 
 
+# A mixin that adds a logging subsystem to the extended object.
 module Mongrel2::Logging
 
 	### Logging

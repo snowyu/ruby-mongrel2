@@ -10,9 +10,6 @@ require 'mongrel2/mixins'
 
 # An interface to the Mongrel2 control port.
 #
-# == Author/s
-# * Michael Granger <ged@FaerieMUD.org>
-#
 # == References
 # (http://mongrel2.org/static/mongrel2-manual.html#x1-380003.8)
 class Mongrel2::Control

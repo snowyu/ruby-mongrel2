@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-
+#
 # A Mongrel2 handler and configuration library for Ruby.
 # 
 # = Author/s

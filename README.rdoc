@@ -4,12 +4,29 @@
 
 == Description
 
-A Mongrel2-specific, middleware-less handler framework for Ruby. It includes
-configuration-database ORM classes, a Ruby implementation of the 'm2sh' tool, 
-a configuration DSL, and handler classes you can use to implement Mongrel2 
-applications in Ruby.
+A Ruby framework for developing web applications for Mongrel2. It includes
+configuration-database ORM classes, a Ruby implementation of the 'm2sh' tool,
+a configuration DSL for generating config databases in pure Ruby, and 
+connect and request classes for creating applications.
 
-More details forthcoming when it gets closer to release.
+It differs from the original Mongrel2 Ruby library (m2r), and the
+mongrel2-rack library in several ways:
+
+* It uses the C extension for 0MQ (zmq) instead of the FFI one. I've had no
+  end of problems with the FFI-based library, and no trouble at all with
+  the extension. If you strongly prefer the FFI library, both of the other
+  Mongrel2 libraries use it, so you'll want to stick to one of them.
+
+* It doesn't come with a Rack handler, or Rails examples, or anything fancy. I
+  intend to build my own webby framework bits around Mongrel2, and I thought
+  maybe someone else might want to as well. If you don't, well again, there
+  are two other libraries for you.
+
+* It includes configuration stuff. I want to make tools that use the Mongrel2
+  config database, so I wrote config classes. Sequel::Model made it
+  stupid-easy. There's also a DSL for generating a config database, too,
+  mostly just because I found it an interesting exercise. I also prefer the
+  way it looks.
 
 
 == Installation
@@ -60,4 +77,6 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+:title: Ruby Mongrel2 API Documentation
 
