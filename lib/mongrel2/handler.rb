@@ -7,7 +7,8 @@ require 'mongrel2/request'
 require 'mongrel2/httprequest'
 require 'mongrel2/jsonrequest'
 
-# Mongrel2 Handler application class.
+# Mongrel2 Handler application class. Instances of this class are the applications
+# which connection to one or more Mongrel2 routes and respond to requests.
 class Mongrel2::Handler
 	include Mongrel2::Loggable
 
@@ -58,21 +59,23 @@ class Mongrel2::Handler
 		self.log.info "Starting up %p" % [ self ]
 		self.set_signal_handlers
 		self.start_accepting_requests
+
+		return self # For chaining
+	ensure
 		self.restore_signal_handlers
 		self.log.info "Done: %p" % [ self ]
-
-		return self
 	end
 
 
-	### Close the handler's connection, shutting it down.
+	### Shut down the handler.
 	def shutdown
 		self.log.info "Shutting down."
 		@conn.close
 	end
 
 
-	### Restart the handler.
+	### Restart the handler. You should override this if you want to re-establish
+	### database connections, flush caches, or other restart-ey stuff.
 	def restart
 		self.log.info "Restarting"
 		old_conn = @conn
@@ -129,6 +132,10 @@ class Mongrel2::Handler
 
 	#
 	# :section: Handler Methods
+	# These methods are the principle mechanism for defining the functionality of
+	# your handler. The logic that dispatches to these methods is all contained in
+	# the #dispatch_request method, so if you want to do something completely different,
+	# you should override that instead.
 	#
 
 	### The main handler function: handle the specified HTTP +request+ (a Mongrel2::Request) and
@@ -172,6 +179,9 @@ class Mongrel2::Handler
 
 	#
 	# :section: Signal Handling
+	# These methods set up some behavior for starting, restarting, and stopping
+	# your application when a signal is received. If you don't want signals to
+	# be handled, override #set_signal_handlers with an empty method.
 	#
 
 	### Set up signal handlers for SIGINT, SIGTERM, SIGINT, and SIGUSR1 that will call the
