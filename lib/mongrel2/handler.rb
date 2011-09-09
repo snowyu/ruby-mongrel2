@@ -9,6 +9,73 @@ require 'mongrel2/jsonrequest'
 
 # Mongrel2 Handler application class. Instances of this class are the applications
 # which connection to one or more Mongrel2 routes and respond to requests.
+#
+# == Example
+#
+# A dumb, dead-simple example that just returns a plaintext 'Hello'
+# document with a timestamp.
+#
+#     #!/usr/bin/env ruby
+#     
+#     require 'mongrel2/handler'
+#     
+#     class HelloWorldHandler < Mongrel2::Handler
+#     
+#       ### The main method to override -- accepts requests and 
+#       ### returns responses.
+#       def handle( request )
+#           response = request.response
+#     
+#           response.status = 200
+#           response.headers.content_type = 'text/plain'
+#           response.puts "Hello, world, it's #{Time.now}!"
+#           
+#           return response
+#       end
+#     
+#     end # class HelloWorldHandler
+#     
+#     HelloWorldHandler.run( 'helloworld-handler' )
+# 
+# This assumes the Mongrel2 SQLite config database is in the current
+# directory, and is named 'config.sqlite' (the Mongrel2 default), but
+# if it's somewhere else, you can point the Mongrel2::Config class
+# to it:
+#
+#     require 'mongrel2/config'
+#     Mongrel2::Config.configure( :configdb => 'mongrel2.db' )
+# 
+# Mongrel2 also includes support for Configurability, so you can
+# configure it along with your database connection, etc. Just add a
+# 'mongrel2' section to the config with a 'configdb' key that points
+# to where the Mongrel2 SQLite config database lives:
+#
+#     # config.yaml
+#     db:
+#       uri: postgres://www@localhost/db01
+#     
+#     mongrel2:
+#       configdb: mongrel2.db
+#     
+#     whatever_else:
+#       ...
+# 
+# Now just loading and installing the config configures Mongrel2 as 
+# well:
+#
+#     require 'configurability/config'
+#
+#     config = Configurability::Config.load( 'config.yml' )
+#     config.install
+#
+# If the Mongrel2 config database isn't accessible, or you need to
+# configure the Handler's two 0mq connections yourself for some
+# reason, you can do that, too:
+#
+#     app = HelloWorldHandler.new( 'helloworld-handler',
+#         'tcp://otherhost:9999', 'tcp://otherhost:9998' )
+#     app.run
+#     
 class Mongrel2::Handler
 	include Mongrel2::Loggable
 

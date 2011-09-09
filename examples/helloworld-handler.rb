@@ -14,12 +14,13 @@ class HelloWorldHandler < Mongrel2::Handler
 		response.status = 200
 		response.headers.content_type = 'text/plain'
 		response.puts "Hello, world, it's #{Time.now}!"
-		# response.keepalive = false
+
 		return response
 	end
 
 end # class HelloWorldHandler
 
+# Log to a file instead of STDERR for a bit more speed.
 Mongrel2.log = Logger.new( 'hello-world.log' )
 Mongrel2.log.level = Logger::INFO
 
