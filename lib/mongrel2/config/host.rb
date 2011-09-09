@@ -14,7 +14,7 @@ class Mongrel2::Config::Host < Mongrel2::Config( :host )
 	#     matching TEXT);
 
 	one_to_many :routes
-
+	many_to_one :server
 
 	### DSL methods for the Server context besides those automatically-generated from its
 	### columns.
