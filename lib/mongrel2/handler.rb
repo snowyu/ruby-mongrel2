@@ -127,13 +127,14 @@ class Mongrel2::Handler
 	end
 
 
-	##
-	# :group: Handler Methods
+	#
+	# :section: Handler Methods
 	#
 
 	### The main handler function: handle the specified HTTP +request+ (a Mongrel2::Request) and
 	### return a response (Mongrel2::Response). If not overridden, this method returns a
 	### '204 No Content' response.
+	### :group: Handler Methods
 	def handle( request )
 		self.log.warn "No default handler; responding with '204 No Content'"
 		response = request.response
@@ -145,6 +146,7 @@ class Mongrel2::Handler
 
 	### Handle a JSON message +request+. If not overridden, JSON message ('@route') 
 	### requests are ignored.
+	### :group: Handler Methods
 	def handle_json( request )
 		self.log.warn "Unhandled JSON message request (%p)" % [ request.headers[:method] ]
 		return nil
@@ -153,6 +155,7 @@ class Mongrel2::Handler
 
 	### Handle an XML message +request+. If not overridden, XML message ('<route') 
 	### requests are ignored.
+	### :group: Handler Methods
 	def handle_xml( request )
 		self.log.warn "Unhandled XML message request (%p)" % [ request.headers[:method] ]
 		return nil
@@ -161,13 +164,14 @@ class Mongrel2::Handler
 
 	### Handle a disconnect notice from Mongrel2 via the given +request+. Its return value
 	### is ignored.
+	### :group: Handler Methods
 	def handle_disconnect( request )
 		return nil
 	end
 
 
-	##
-	# :group: Signal Handling
+	#
+	# :section: Signal Handling
 	#
 
 	### Set up signal handlers for SIGINT, SIGTERM, SIGINT, and SIGUSR1 that will call the

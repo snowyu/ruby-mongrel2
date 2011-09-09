@@ -4,18 +4,18 @@
 
 == Description
 
-A Ruby framework for developing web applications for Mongrel2. It includes
-configuration-database ORM classes, a Ruby implementation of the 'm2sh' tool,
-a configuration DSL for generating config databases in pure Ruby, and 
-connect and request classes for creating applications.
+A Ruby connector for Mongrel2[http://mongrel2.org/].
+
+This library includes configuration-database ORM classes, a Ruby
+implementation of the 'm2sh' tool, a configuration DSL for generating config
+databases in pure Ruby, a Control port interface object, handler classes for creating applications or higher-level frameworks.
 
 It differs from the original Mongrel2 Ruby library (m2r), and the
 mongrel2-rack library in several ways:
 
-* It uses the C extension for 0MQ (zmq) instead of the FFI one. I've had no
-  end of problems with the FFI-based library, and no trouble at all with
-  the extension. If you strongly prefer the FFI library, both of the other
-  Mongrel2 libraries use it, so you'll want to stick to one of them.
+* It uses the C extension for 0MQ (zmq) instead of the FFI one. If you
+  strongly prefer the FFI library, both of the other Mongrel2 libraries use
+  it, so you'll want to stick to one of them.
 
 * It doesn't come with a Rack handler, or Rails examples, or anything fancy. I
   intend to build my own webby framework bits around Mongrel2, and I thought
@@ -25,13 +25,79 @@ mongrel2-rack library in several ways:
 * It includes configuration stuff. I want to make tools that use the Mongrel2
   config database, so I wrote config classes. Sequel::Model made it
   stupid-easy. There's also a DSL for generating a config database, too,
-  mostly just because I found it an interesting exercise. I also prefer the
-  way it looks.
+  mostly because I found it an interesting exercise, and I like the way it
+  looks.
 
 
 == Installation
 
     gem install mongrel2
+
+
+== Usage
+
+The library consists of three major parts: the Config ORM classes, the
+Handler classes, and the Control class.
+
+=== Config ORM Classes
+
+There's one class per table like with most ORMs, a Mongrel2::Config::DSL mixin
+for adding the Ruby configuration DSL to your namespace, and the top-level
+Mongrel2::Config class, which manages the database connection, installs the
+schema, etc.
+
+* Mongrel2::Config
+  * Mongrel2::Config::DSL
+  * Mongrel2::Config::Server
+  * Mongrel2::Config::Host
+  * Mongrel2::Config::Route
+  * Mongrel2::Config::Directory
+  * Mongrel2::Config::Proxy
+  * Mongrel2::Config::Handler
+  * Mongrel2::Config::Setting
+  * Mongrel2::Config::Mimetype
+  * Mongrel2::Config::Statistic
+  * Mongrel2::Config::Log
+
+
+=== Handler Classes
+
+The main handler class is, unsurprisingly, Mongrel2::Handler. It uses a
+Mongrel2::Connection object to talk to the server, wrapping the request data
+up in a Mongrel2::Request object, and expecting a Mongrel2::Response in
+response.
+
+There are specialized Request classes for each of the kinds of requests
+Mongrel2 sends:
+
+* Mongrel2::HTTPRequest
+* Mongrel2::JSONRequest
+* Mongrel2::XMLRequest
+
+These are all {overridable}[rdoc-ref:Mongrel2::Request.register_request_type]
+if you should want a more-specialized class for one of them.
+
+
+=== The Control Class
+
+The Mongrel2::Control class is an object interface to {the Mongrel2 control
+port}[http://mongrel2.org/static/mongrel2-manual.html#x1-390003.8]. It can be
+used to stop and restart the server, check its status, etc.
+
+
+=== Other Classes
+
+There are a few other classes and modules, too:
+
+[Mongrel2::Constants]
+  A collection of constants used throughout the rest of the library.
+[Mongrel2::Loggable]
+  A mixin for adding logging methods to a class.
+[Mongrel2::Table]
+  A case-insensitive hash-like object class that can store multiple values per 
+  key, and serialize itself into RFC822-style headers. Used for 
+  request[rdoc-ref:Mongrel2::Request#headers] and 
+  response[rdoc-ref:Mongrel2::Response#headers] headers.
 
 
 == Contributing

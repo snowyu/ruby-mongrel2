@@ -26,7 +26,7 @@ require 'mongrel2/control'
 describe Mongrel2::Control do
 
 	before( :all ) do
-		setup_logging( :debug )
+		setup_logging( :fatal )
 	end
 
 	before( :each ) do

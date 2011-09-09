@@ -8,10 +8,6 @@ require 'mongrel2/mixins'
 
 
 # The Mongrel2 Response base class.
-#
-# == Author/s
-# * Michael Granger <ged@FaerieMUD.org>
-#
 class Mongrel2::Response
 	include Mongrel2::Loggable
 

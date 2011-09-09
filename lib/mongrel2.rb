@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
 #
-# A Mongrel2 handler and configuration library for Ruby.
+# A Mongrel2 connector and configuration library for Ruby.
 # 
-# = Author/s
+# == Author/s
 # 
 # * Michael Granger <ged@FaerieMUD.org>
 # 
@@ -50,6 +50,7 @@ module Mongrel2
 
 	require 'mongrel2/exceptions'
 	require 'mongrel2/connection'
+	require 'mongrel2/handler'
 	require 'mongrel2/request'
 	require 'mongrel2/httprequest'
 	require 'mongrel2/jsonrequest'

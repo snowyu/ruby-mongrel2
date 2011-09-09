@@ -94,13 +94,19 @@ class Mongrel2::Table
 
 
 	### Enumerator for iterating over the table contents, yielding each as an RFC822 header.
-	def each_header
-		return Enumerator.new do |yielder|
+	def each_header( &block )
+		enum = Enumerator.new do |yielder|
 			@hash.each do |header, value|
 				Array( value ).each do |val|
 					yielder.yield( normalize_header(header), val.to_s )
 				end
 			end
+		end
+
+		if block
+			return enum.each( &block )
+		else
+			return enum
 		end
 	end
 

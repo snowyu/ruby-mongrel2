@@ -1,6 +1,11 @@
 #!/usr/bin/ruby
 
 require 'sequel'
+begin
+	require 'configurability'
+rescue LoadError
+	# No-op: it's optional
+end
 
 # Rude hack to stop Sequel::Model from complaining if it's subclassed before
 # the first database connection is established. Ugh.
@@ -21,9 +26,6 @@ module Mongrel2
 	# subclasses[http://sequel.rubyforge.org/rdoc-plugins/classes/Sequel/Plugins/Subclasses.html]
 	# plugins.
 	# 
-	# == Author/s
-	# * Michael Granger <ged@FaerieMUD.org>
-	#
 	# == References
 	# * http://mongrel2.org/static/mongrel2-manual.html#x1-250003.4
 	#

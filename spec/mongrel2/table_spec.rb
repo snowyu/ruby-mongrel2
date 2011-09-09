@@ -167,6 +167,11 @@ describe Mongrel2::Table do
 		values.transpose[0].should include( 'Thai-Food', 'With-Absinthe', 'A-Number-Of-Some-Sort' )
 		values.transpose[1].should include( 'normally good', 'seldom hot enough', 'questionable', '2' )
 	end
+
+
+	it "can yield an Enumerator for its header iterator" do
+		@table.each_header.should be_a( Enumerator )
+	end
 end
 
 

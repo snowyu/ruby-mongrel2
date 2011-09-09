@@ -87,8 +87,8 @@ describe Mongrel2::Config::DSL do
 				host 'brillianttaste' do
 					matching '*.brillianttasteinthefoodmouth.com'
 
-					route '/images', directory( '/var/www/images', 'index.html', 'image/jpeg' )
-					route '/css', directory( '/var/www/css', 'index.html', 'text/css' )
+					route '/images', directory( 'var/www/images/', 'index.html', 'image/jpeg' )
+					route '/css', directory( 'var/www/css/', 'index.html', 'text/css' )
 					route '/vote', proxy( 'localhost', 6667 )
 					route '/admin', handler(
 						'tcp://127.0.0.1:9998',
@@ -106,7 +106,7 @@ describe Mongrel2::Config::DSL do
 				end
 
 				host 'deveiate.org' do
-					route '', directory('/usr/local/deveiate/www/public', 'index.html')
+					route '', directory('usr/local/deveiate/www/public/', 'index.html')
 				end
 
 			end
@@ -123,11 +123,11 @@ describe Mongrel2::Config::DSL do
 
 			host1.routes[0].path.should == '/images'
 			host1.routes[0].target.should be_a( Mongrel2::Config::Directory )
-			host1.routes[0].target.base.should == '/var/www/images'
+			host1.routes[0].target.base.should == 'var/www/images/'
 
 			host1.routes[1].path.should == '/css'
 			host1.routes[1].target.should be_a( Mongrel2::Config::Directory )
-			host1.routes[1].target.base.should == '/var/www/css'
+			host1.routes[1].target.base.should == 'var/www/css/'
 
 			host1.routes[2].path.should == '/vote'
 			host1.routes[2].target.should be_a( Mongrel2::Config::Proxy )
