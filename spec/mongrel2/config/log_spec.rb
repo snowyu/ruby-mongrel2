@@ -10,6 +10,7 @@ BEGIN {
 	$LOAD_PATH.unshift( libdir ) unless $LOAD_PATH.include?( libdir )
 }
 
+require 'socket'
 require 'rspec'
 
 require 'spec/lib/constants'
@@ -50,6 +51,15 @@ describe Mongrel2::Config::Log do
 		log.how.should == how
 	end
 
+	it "has reasonable defaults for 'where' and 'how'" do
+		what  = 'load etc/mongrel2.conf'
+		why   = 'updating'
+
+		log = Mongrel2::Config::Log.log_action( what, why )
+
+		log.location.should == Socket.gethostname
+		log.how.should == File.basename( $0 )
+	end
 
 	describe "an entry" do
 

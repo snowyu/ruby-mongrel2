@@ -21,7 +21,7 @@ class Mongrel2::Config::Log < Mongrel2::Config( :log )
 	### Log an entry to the commit log with the given +what+, +why+, +where+, and +how+ values
 	### and return it after it's saved.
 	def self::log_action( what, why=nil, where=nil, how=nil )
-		where ||= Socket.hostname
+		where ||= Socket.gethostname
 		how ||= File.basename( $0 )
 
 		who = Etc.getlogin
