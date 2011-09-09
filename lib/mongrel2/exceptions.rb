@@ -15,11 +15,12 @@ module Mongrel2
 	class UnhandledMethodError < Mongrel2::Exception
 
 		### Set the +method_name+ that was unhandled.
-		def initialize( method_name )
+		def initialize( method_name, *args )
 			@method_name = method_name
-			super "Unhandled method %p" % [ method_name ]
+			super( "Unhandled method %p" % [ method_name ], *args )
 		end
 
+		# The METHOD that was unhandled
 		attr_reader :method_name
 
 	end # class UnhandledMethodError
@@ -36,6 +37,21 @@ module Mongrel2
 	# An exception type raised by a response if it can't generate a valid response
 	# document
 	class ResponseError < Mongrel2::Exception; end
+
+	# An exception type raised by Mongrel2::Control requests if they result in
+	# an error response.
+	class ControlError < Mongrel2::Exception
+
+		### Set the error +code+ in addition to the +message+.
+		def initialize( code, message )
+			@code = code.to_sym
+			super( message )
+		end
+
+		# The code of the particular kind of control error (a Symbol)
+		attr_reader :code
+
+	end # class ControlError
 
 end # module Mongrel2
 
