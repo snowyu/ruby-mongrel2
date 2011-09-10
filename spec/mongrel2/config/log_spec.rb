@@ -10,6 +10,7 @@ BEGIN {
 	$LOAD_PATH.unshift( libdir ) unless $LOAD_PATH.include?( libdir )
 }
 
+require 'socket'
 require 'rspec'
 
 require 'spec/lib/constants'
@@ -25,7 +26,71 @@ require 'mongrel2/config'
 
 describe Mongrel2::Config::Log do
 
-	# No functionality outside of Sequel::Model's purview yet
+	before( :all ) do
+		setup_logging( :fatal )
+		Mongrel2::Config.configure( :configdb => ':memory:' )
+		Mongrel2::Config.init_database!
+	end
+
+	after( :all ) do
+		reset_logging()
+	end
+
+
+	it "has a convenience method for writing to the commit log" do
+		what  = 'load etc/mongrel2.conf'
+		why   = 'updating'
+		where = 'localhost'
+		how   = 'm2sh'
+
+		log = Mongrel2::Config::Log.log_action( what, why, where, how )
+
+		log.what.should == what
+		log.why.should == why
+		log.location.should == where
+		log.how.should == how
+	end
+
+	it "has reasonable defaults for 'where' and 'how'" do
+		what  = 'load etc/mongrel2.conf'
+		why   = 'updating'
+
+		log = Mongrel2::Config::Log.log_action( what, why )
+
+		log.location.should == Socket.gethostname
+		log.how.should == File.basename( $0 )
+	end
+
+	describe "an entry" do
+
+		before( :each ) do
+			@log = Mongrel2::Config::Log.new(
+				who:         'who',
+				what:        'what',
+				location:    'location',
+				happened_at: Time.at( 1315598592 ),
+				how:         'how',
+				why:         'why'
+			)
+		end
+
+
+		it "stringifies as a readable log file line" do
+
+			# 2011-09-09 20:29:47 -0700 [mgranger] @localhost m2sh: load etc/mongrel2.conf (updating)
+			@log.to_s.should =~ %r{
+				^
+				(?-x:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [\+\-]\d{4} )
+				\[who\] \s
+				@location \s
+				how: \s
+				what \s
+				\(why\)
+				$
+			}x
+		end
+
+	end
 
 end
 
