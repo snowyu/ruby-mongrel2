@@ -36,6 +36,8 @@ class Mongrel2::Config::Log < Mongrel2::Config( :log )
 	end
 
 
+	# :todo: Correct the happened_at, which is set in UTC, but fetched in localtime.
+
 
 	### Stringify the log entry and return it.
 	def to_s

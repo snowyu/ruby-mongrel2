@@ -27,7 +27,7 @@ describe Mongrel2::Config do
 
 	before( :all ) do
 		setup_logging()
-		Mongrel2::Config.configure( :configdb => ':memory:' )
+		setup_config_db()
 	end
 
 	after( :all ) do
@@ -48,14 +48,22 @@ describe Mongrel2::Config do
 	end
 
 	it "can reset the database handle for the config classes" do
-		db = Sequel.sqlite( ':memory:' )
+		db = Mongrel2::Config.in_memory_db
 		Mongrel2::Config.db = db
 		Mongrel2::Config::Directory.db.should equal( db )
 	end
 
 	it "has a convenience method for fetching an Array of all of its configured servers" do
-		Mongrel2::Config.init_database!
-		s = Mongrel2::Config::Server.create( :uuid => TEST_UUID )
+		Mongrel2::Config.init_database
+		Mongrel2::Config::Server.dataset.truncate
+		s = Mongrel2::Config::Server.create(
+			uuid: TEST_UUID,
+			access_log: '/log/access.log',
+			error_log: '/log/error.log',
+			pid_file: '/run/m2.pid',
+			default_host: 'localhost',
+			port: 8275
+		  )
 		Mongrel2::Config.servers.should have( 1 ).member
 		Mongrel2::Config.servers.first.uuid.should == TEST_UUID
 	end
@@ -65,14 +73,14 @@ describe Mongrel2::Config do
 	end
 
 	it "knows whether or not its database has been initialized" do
-		Mongrel2::Config.db = Sequel.sqlite( ':memory:' )
+		Mongrel2::Config.db = Mongrel2::Config.in_memory_db
 		Mongrel2::Config.database_initialized?.should be_false()
 		Mongrel2::Config.init_database!
 		Mongrel2::Config.database_initialized?.should be_true()
 	end
 
 	it "doesn't re-initialize the database if the non-bang version of init_database is used" do
-		Mongrel2::Config.db = Sequel.sqlite( ':memory:' )
+		Mongrel2::Config.db = Mongrel2::Config.in_memory_db
 		Mongrel2::Config.init_database
 
 		Mongrel2::Config.should_not_receive( :load_config_schema )

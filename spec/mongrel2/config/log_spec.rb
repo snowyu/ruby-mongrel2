@@ -28,8 +28,7 @@ describe Mongrel2::Config::Log do
 
 	before( :all ) do
 		setup_logging( :fatal )
-		Mongrel2::Config.configure( :configdb => ':memory:' )
-		Mongrel2::Config.init_database!
+		setup_config_db()
 	end
 
 	after( :all ) do

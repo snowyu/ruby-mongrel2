@@ -39,7 +39,6 @@ require 'mongrel2/config'
 
 require 'sequel'
 require 'sequel/model'
-require 'sequel/adapters/sqlite'
 
 require 'spec/lib/constants'
 require 'spec/lib/matchers'
@@ -154,10 +153,11 @@ module Mongrel2::SpecHelpers
 
 	### Set up a Mongrel2 configuration database in memory.
 	def setup_config_db( dbspec=':memory:' )
-		Mongrel2::Config.configure( :configdb => dbspec )
-		Mongrel2::Config.initialize_database!
+		Mongrel2::Config.configure( :configdb => dbspec ) unless
+			Mongrel2::Config.db.uri[ %r{sqlite:/(.*)}, 1 ] == dbspec
+		Mongrel2::Config.init_database
+		Mongrel2::Config.db.tables.collect {|t| Mongrel2::Config.db[t] }.each( &:truncate )
 	end
-
 
 
 	### Set up a Mongrel2 server instance.
@@ -323,6 +323,12 @@ end
 
 
 abort "You need a version of RSpec >= 2.6.0" unless defined?( RSpec )
+
+if defined?( ::Amalgalite )
+	$stderr.puts ">>> Using Amalgalite #{Amalgalite::VERSION} for DB access."
+else
+	$stderr.puts ">>> Using SQLite3 #{SQLite3::VERSION} for DB access."
+end
 
 ### Mock with RSpec
 RSpec.configure do |c|

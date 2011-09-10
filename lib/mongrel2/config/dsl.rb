@@ -89,7 +89,7 @@ module Mongrel2::Config::DSL
 		def initialize( targetclass, opts={} )
 			self.log.debug "Wrapping a %p" % [ targetclass ]
 			@targetclass = targetclass
-			@target = @targetclass.create( opts )
+			@target = @targetclass.new( opts )
 			self.decorate_with_column_declaratives( @target )
 			self.decorate_with_custom_declaratives( @targetclass )
 		end

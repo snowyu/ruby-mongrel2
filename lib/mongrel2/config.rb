@@ -1,15 +1,26 @@
 #!/usr/bin/ruby
 
+require 'pathname'
+require 'uri'
+
 require 'sequel'
+
 begin
 	require 'configurability'
 rescue LoadError
 	# No-op: it's optional
 end
 
-# Rude hack to stop Sequel::Model from complaining if it's subclassed before
-# the first database connection is established. Ugh.
-Sequel::Model.db = Sequel.sqlite if Sequel::DATABASES.empty?
+begin
+	require 'amalgalite'
+	# Rude hack to stop Sequel::Model from complaining if it's subclassed before
+	# the first database connection is established. Ugh.
+	Sequel::Model.db = Sequel.amalgalite if Sequel::DATABASES.empty?
+rescue LoadError
+	require 'sqlite3'
+	Sequel::Model.db = Sequel.sqlite if Sequel::DATABASES.empty?
+end
+
 
 require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/mixins'
@@ -62,13 +73,35 @@ module Mongrel2
 		end
 
 
+		### Return a bound Method object to the Sequel constructor of choice for the
+		### config DB. This is used to choose either 'amalgalite' or 'sqlite3', preferring
+		### the former.
+		def self::adapter_method
+			if defined?( ::Amalgalite )
+				return Sequel.method( :amalgalite )
+			else
+				return Sequel.method( :sqlite )
+			end
+		end
+
+
+		### Return a Sequel::Database for an in-memory database via the available SQLite library
+		def self::in_memory_db
+			# Just calling either .amalgalite or .sqlite returns an in-memory DB
+			return self.adapter_method.call
+		end
+
+
 		### Configurability API -- called when the configuration is loaded with the
 		### 'mongrel2' section of the config file if there is one. This method can also be used
 		### without Configurability by passing an object that can be merged with
 		### Mongrel2::Config::DEFAULTS.
 		def self::configure( config={} )
 			config = DEFAULTS.merge( config )
-			self.db = Sequel.sqlite( config[:configdb] ) if config[ :configdb ]
+
+			if config[ :configdb ]
+				self.db = self.adapter_method.call( config[:configdb] )
+			end
 		end
 
 
@@ -131,6 +164,15 @@ module Mongrel2
 			self.db = db
 		end
 
+
+		### Return a Pathname object for the current database, or nil if the current
+		### database is an in-memory one.
+		def self::pathname
+			dburi = URI( self.db.uri )
+			pathname = dburi.path
+			pathname.slice!( 0, 1 ) if pathname.start_with?( '/' )
+			return Pathname( pathname )
+		end
 
 	end # class Config
 
