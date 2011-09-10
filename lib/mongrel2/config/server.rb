@@ -23,6 +23,18 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 	one_to_many :hosts
 
 
+	#
+	# :section: Validation Callbacks
+	#
+
+	### Sequel validation callback: add errors if the record is invalid.
+	def validate
+		self.validates_presence [ :access_log, :error_log, :pid_file, :default_host, :port ],
+			message: 'is missing or nil'
+	end
+
+
+
 	### DSL methods for the Server context besides those automatically-generated from its
 	### columns.
 	module DSLMethods
@@ -30,7 +42,7 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 		### Add a Mongrel2::Config::Host to the Server object with the given +hostname+. If a
 		### +block+ is specified, it can be used to further configure the Host.
 		def host( name, &block )
-			self.target.save
+			self.target.save( :validate => false )
 
 			Mongrel2.log.debug "Host [%s] (block: %p)" % [ name, block ]
 			adapter = Mongrel2::Config::DSL::Adapter.new( Mongrel2::Config::Host,
