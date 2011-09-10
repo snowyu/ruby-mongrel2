@@ -28,7 +28,7 @@ module Mongrel2
 	### Get the library version. If +include_buildnum+ is true, the version string will
 	### include the VCS rev ID.
 	def self::version_string( include_buildnum=false )
-		vstring = "%s %s" % [ self.name, VERSION ]
+		vstring = "Ruby-Mongrel2 %s" % [ VERSION ]
 		vstring << " (build %s)" % [ REVISION[/: ([[:xdigit:]]+)/, 1] || '0' ] if include_buildnum
 		return vstring
 	end
