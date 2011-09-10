@@ -6,21 +6,6 @@
 # if this matters), and the commit log entry. I'll add commit log
 # stuff soon.
 
-BEGIN {
-	require 'pathname'
-	basedir = Pathname( __FILE__ ).dirname.parent
-	libdir = basedir + 'lib'
-
-	$LOAD_PATH.unshift( libdir.to_s )
-}
-
-require 'rubygems'
-require 'mongrel2'
-require 'mongrel2/config'
-
-Mongrel2::Config.configure( :configdb => 'mongrel2.org.rb.sqlite' )
-include Mongrel2::Config::DSL
-
 # the server to run them all 
 server '2f62bd5-9e59-49cd-993c-3b6013c28f05' do
 
@@ -80,6 +65,20 @@ server '2f62bd5-9e59-49cd-993c-3b6013c28f05' do
 		) 
 	end
 
+end
+
+server 'admin' do
+    name 'adminserver'
+	port 8118
+	access_log '/logs/admin-access.log'
+	error_log '/logs/admin-error.log'
+	pid_file '/run/admin.pid'
+
+	default_host 'localhost'
+
+    host 'localhost' do
+        route '/', directory( 'data/admin/', 'index.html' )
+    end
 end
 
 settings(
