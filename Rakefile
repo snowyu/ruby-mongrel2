@@ -21,12 +21,13 @@ hoespec = Hoe.spec 'Mongrel2' do
 	self.readme_file = 'README.rdoc'
 	self.history_file = 'History.rdoc'
 	self.extra_rdoc_files << 'README.rdoc' << 'History.rdoc'
+	self.spec_extras[:rdoc_options] = ['-t', 'Ruby-Mongrel2']
 
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
 	self.dependency 'nokogiri',   '~> 1.5'
 	self.dependency 'sequel',     '~> 3.26'
-	self.dependency 'sqlite3',    '~> 1.3'
+	self.dependency 'amalgalite', '~> 1.1'
 	self.dependency 'tnetstring', '~> 0.3'
 	self.dependency 'yajl-ruby',  '~> 0.8'
 	self.dependency 'zmq',        '~> 2.1.3.1'

@@ -1,4 +1,5 @@
-= Mongrel2
+
+= Ruby-Mongrel2
 
 * https://bitbucket.org/ged/ruby-mongrel2
 
@@ -33,14 +34,12 @@ mongrel2-rack library in several ways:
 
     gem install mongrel2
 
-This library prefers Jeremy Hinegardner's 'amalgalite' library for the config
-ORM classes, but will fall back to the 'sqlite3' gem if 'amalgalite' isn't
-available. I'd highly recommend installing amalgalite if you're doing testing,
-as the specs run about twice as fast:
+
+This library uses Jeremy Hinegardner's 'amalgalite' library for the config ORM classes, but it will also fall back to using the sqlite3 library instead:
 
     # Loading the sqlite3 library explicitly
     $ rspec -rsqlite3 -cfp spec
-	>>> Using SQLite3 1.3.4 for DB access.
+    >>> Using SQLite3 1.3.4 for DB access.
     .....[...]
 
     Finished in 5.53 seconds
@@ -48,7 +47,7 @@ as the specs run about twice as fast:
 
     # No -rsqlite3 means amalgalite loads first.
     $ rspec -cfp spec
-	>>> Using Amalgalite 1.1.2 for DB access.
+    >>> Using Amalgalite 1.1.2 for DB access.
     .....[...]
 
     Finished in 3.67 seconds
@@ -97,6 +96,9 @@ Mongrel2 sends:
 
 These are all {overridable}[rdoc-ref:Mongrel2::Request.register_request_type]
 if you should want a more-specialized class for one of them.
+
+The Mongrel2::Handler class itself has documentation on how to write your own
+handlers.
 
 
 === The Control Class
@@ -164,6 +166,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-:title: Ruby Mongrel2 API Documentation
 
