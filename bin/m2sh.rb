@@ -15,11 +15,12 @@ require 'mongrel2'
 require 'mongrel2/config'
 
 
-# A tool for interacting with a Mongrel2 config database and server
+# A tool for interacting with a Mongrel2 config database and server. This isn't
+# quite a replacement for the real m2sh yet; here's what I have working so far:
 #
 #   [√]    load  Load a config.
 #   [√]  config  Alias for load.
-#   [ ]   shell  Starts an interactive shell.
+#   [√]   shell  Starts an interactive shell.
 #   [√]  access  Prints the access log.
 #   [√] servers  Lists the servers in a config database.
 #   [√]   hosts  Lists the hosts in a server.
@@ -33,14 +34,19 @@ require 'mongrel2/config'
 #   [ ] control  Connects to the control port.
 #   [√] version  Prints the Mongrel2 and m2sh version.
 #   [√]    help  Get help, lists commands.
-#   [ ]    uuid  Prints out a randomly generated UUID.
+#   [-]    uuid  Prints out a randomly generated UUID.
 #
+# I just use 'uuidgen' to generate uuids (which is all m2sh does, as
+# well), so I don't plan to implement that. Everything else should
+# be pretty easy.
+# 
 class Mongrel2::M2SHCommand
 	extend ::Sysexits
 	include Sysexits,
 	        Mongrel2::Loggable,
 	        Mongrel2::Constants
 
+	# Make a HighLine color scheme
 	COLOR_SCHEME = HighLine::ColorScheme.new do |scheme|
 		scheme[:header]	   = [ :bold, :yellow ]
 		scheme[:subheader] = [ :bold, :white ]
@@ -51,8 +57,21 @@ class Mongrel2::M2SHCommand
 		scheme[:message]   = [ :reset ]
 	end
 
-	# Help for commands, keyed by command name
-	@command_help = Hash.new {|h,k| h[k] = { :desc => '', :usage => ''} }
+
+	# Path to the default history file for 'shell' mode
+	HISTORY_FILE = Pathname( "~/.m2shrb.history" )
+
+	# Number of items to store in history by default
+	DEFAULT_HISTORY_SIZE = 100
+
+	# The prompt the 'shell' mode should show
+	PROMPT = 'mongrel2> '
+
+
+	# Class instance variables
+	@command_help = Hash.new {|h,k| h[k] = { :desc => nil, :usage => ''} }
+	@prompt = @option_parser = nil
+
 
 	### Add a help string for the given +command+.
 	def self::help( command, helpstring=nil )
@@ -77,8 +96,6 @@ class Mongrel2::M2SHCommand
 	end
 
 
-	@prompt = nil
-
 	### Return the global Highline prompt object, creating it if necessary.
 	def self::prompt
 		unless @prompt
@@ -100,14 +117,6 @@ class Mongrel2::M2SHCommand
 		end
 
 		command = oparser.leftovers.shift
-		if command.nil? || command == 'shell'
-			$stderr.puts "This version doesn't run in shell mode yet."
-			exit :unavailable
-		elsif command == 'help'
-			self.show_help( oparser )
-			exit :ok
-		end
-
 		self.new( opts ).run( command, *oparser.leftovers )
 		exit :ok
 
@@ -119,25 +128,20 @@ class Mongrel2::M2SHCommand
 	end
 
 
-	### Show output for the 'help' command.
-	def self::show_help( oparser )
-		command = oparser.leftovers.shift
+	### Return a String that describes the available commands, e.g., for the 'help'
+	### command.
+	def self::make_command_table
+		commands = self.available_commands
 
-		# Subcommand help
-		if command
-			if self.available_commands.include?( command )
-				desc = self.prompt.color( self.help(command), :header )
-				desc << "\n" << 'Usage: ' << command << ' ' << self.usage(command) << "\n"
-				self.prompt.say( desc )
-			else
-				self.prompt.say( %{<%= color "No such command '#{command}'", :error %>} )
-			end
-
-		# Help by itself is the same as -h
-		else
-			oparser.educate( $stderr )
-		end
-
+		# Build the command table
+		col1len = commands.map( &:length ).max
+		return commands.collect do |cmd|
+			helptext = self.help( cmd.to_sym ) or next # no help == invisible command
+			"%s  %s" % [
+				self.prompt.color(cmd.rjust(col1len), :key),
+				self.prompt.color(helptext, :value)
+			]
+		end.compact
 	end
 
 
@@ -154,44 +158,37 @@ class Mongrel2::M2SHCommand
 	### Create and configure a command-line option parser for the command.
 	### Returns a Trollop::Parser.
 	def self::make_option_parser
-		progname = File.basename( $0 )
-		default_configdb = Mongrel2::DEFAULT_CONFIG_URI
+		unless @option_parser
+			progname = File.basename( $0 )
+			default_configdb = Mongrel2::DEFAULT_CONFIG_URI
 
-		# Make a list of the log level names and the available commands
-		loglevels = Mongrel2::Logging::LOG_LEVELS.
-			sort_by {|name,lvl| lvl }.
-			collect {|name,lvl| name.to_s }.
-			join( ', ' )
-		commands = self.available_commands
+			# Make a list of the log level names and the available commands
+			loglevels = Mongrel2::Logging::LOG_LEVELS.
+				sort_by {|name,lvl| lvl }.
+				collect {|name,lvl| name.to_s }.
+				join( ', ' )
+			command_table = self.make_command_table
 
-		# Build the command table
-		col1len = commands.map( &:length ).max
-		command_table = commands.collect do |cmd|
-			helptext = self.help( cmd.to_sym ) or next # no help == invisible command
-			"%s  %s" % [
-				self.prompt.color(cmd.rjust(col1len), :key),
-				self.prompt.color(helptext, :value)
-			]
+			@option_parser = Trollop::Parser.new do
+				banner "Mongrel2 (Ruby) Shell has these commands available:"
+
+				text ''
+				command_table.each {|line| text(line) }
+				text ''
+
+				text 'Global Options'
+				opt :config, "Specify the configfile to use.",
+					:default => DEFAULT_CONFIG_URI
+				text ''
+
+				text 'Other Options:'
+				opt :debug, "Turn debugging on. Also sets the --loglevel to 'debug'."
+				opt :loglevel, "Set the logging level. Must be one of: #{loglevels}",
+					:default => Mongrel2::Logging::LOG_LEVEL_NAMES[ Mongrel2.logger.level ]
+			end
 		end
 
-
-		return Trollop::Parser.new do
-			banner "Mongrel2 (Ruby) Shell has these commands available:"
-
-			text ''
-			command_table.each {|line| text(line) }
-			text ''
-
-			text 'Global Options'
-			opt :config, "Specify the configfile to use.",
-				:default => DEFAULT_CONFIG_URI
-			text ''
-
-			text 'Other Options:'
-			opt :debug, "Turn debugging on. Also sets the --loglevel to 'debug'."
-			opt :loglevel, "Set the logging level. Must be one of: #{loglevels}",
-				:default => Mongrel2::Logging::LOG_LEVEL_NAMES[ Mongrel2.logger.level ]
-		end
+		return @option_parser
 	end
 
 
@@ -204,6 +201,7 @@ class Mongrel2::M2SHCommand
 	def initialize( options )
 		Mongrel2.logger.formatter = Mongrel2::Logging::ColorFormatter.new( Mongrel2.logger )
 		@options = options
+		@shellmode = false
 
 		if @options.debug
 			$DEBUG = true
@@ -224,24 +222,23 @@ class Mongrel2::M2SHCommand
 	# The Trollop options hash the command will read its configuration from
 	attr_reader :options
 
+	# True if running in shell mode
+	attr_reader :shellmode
+
 
 	# Delegate the instance #prompt method to the class method instead
 	define_method( :prompt, &self.method(:prompt) )
 
 
-	### Display an +object+ highlighted as a header.
-	def print_header( object )
-		self.prompt.say( self.prompt.color(object.to_s, :header) )
-	end
-
-
 	### Run the command with the specified +command+ and +args+.
 	def run( command, *args )
+		command ||= 'shell'
 		cmd_method = nil
+
 		begin
 			cmd_method = self.method( "#{command}_command" )
 		rescue NoMethodError => err
-			self.prompt.say( self.prompt.color("No such command", :error) )
+			error "No such command"
 			exit :usage
 		end
 
@@ -253,19 +250,45 @@ class Mongrel2::M2SHCommand
 	# Commands
 	#
 
+	### The 'help' command
+	def help_command( *args )
+
+		# Subcommand help
+		if !args.empty?
+			command = args.shift
+
+			if self.class.available_commands.include?( command )
+				header( self.class.help(command) )
+				desc = "\n" + 'Usage: ' + command + ' ' + self.class.usage(command) + "\n"
+				message( desc )
+			else
+				error "No such command %p" % [ command ]
+			end
+
+		# Help by itself show the table of available commands
+		else
+			command_table = self.class.make_command_table
+			header "Available Commands"
+			message( *command_table )
+		end
+
+	end
+	help :help, "Show help for a single COMMAND if given, or list available commands if not"
+	usage :help, "[COMMAND]"
+
+
 	### The 'load' command
-	def load_command( configfile )
+	def load_command( *args )
+		configfile = args.shift or
+			raise "No configfile specified."
+
 		runspace = Module.new do
 			extend Mongrel2::Config::DSL
 		end
 
-		self.prompt.say( self.prompt.color("Loading config from #{configfile}", :header) )
+		header "Loading config from #{configfile}"
 		source = File.read( configfile )
-
-		self.prompt.say( "  initializing database" )
 		Mongrel2::Config.init_database!
-
-		self.prompt.say( "  running DSL" )
 		runspace.module_eval( source, configfile, 0 )
 	end
 	help :load, "Overwrite the config database with the values from the speciifed CONFIGFILE."
@@ -282,11 +305,6 @@ class Mongrel2::M2SHCommand
 	help :config, "Alias for 'load'."
 
 
-	### (Undocumented)
-	def method_name
-		
-	end
-
 	### The 'init' command
 	def init_command( * )
 		if Mongrel2::Config.database_initialized?
@@ -294,10 +312,75 @@ class Mongrel2::M2SHCommand
 				self.prompt.agree( "Are you sure you want to destroy the current config? " )
 		end
 
-		self.prompt.say( self.prompt.color("Initializing #{self.options.config}", :header) )
+		header "Initializing #{self.options.config}"
 		Mongrel2::Config.init_database!
 	end
-	help :init, "Initialize a new config database."
+	help :init, "Initialize a new empty config database."
+
+
+	### The 'shell' command.
+	def shell_command( * )
+		require 'readline'
+		require 'termios'
+		require 'shellwords'
+
+		term = Termios.getattr( $stdin )
+		@shellmode = true
+
+		# Set up the completion callback
+		# self.setup_completion
+
+		# Load saved command-line history
+		self.read_history
+
+		# Run until something sets the quit flag
+		quitting = false
+		until quitting
+			$stderr.puts
+			input = Readline.readline( PROMPT, true )
+			self.log.debug "Input is: %p" % [ input ]
+
+			# EOL makes the shell quit
+			if input.nil?
+				self.log.debug "EOL: setting quit flag"
+				quitting = true
+
+			# Blank input -- just reprompt
+			elsif input == ''
+				self.log.debug "No command. Re-displaying the prompt."
+
+			# Parse everything else into command + args
+			else
+				self.log.debug "Dispatching input: %p" % [ input ]
+				command, *args = Shellwords.split( input )
+
+				# Don't allow recursive shells
+				if command == 'shell'
+					error "Already in a shell."
+					next
+				end
+
+				begin
+					self.run( command, *args )
+				rescue => err
+					error "%p: %s" % [ err.class, err.message ]
+					err.backtrace.each do |frame|
+						self.log.debug "  " + frame
+					end
+				end
+			end
+		end
+
+		message "\nSaving history...\n"
+		self.save_history
+
+		message "done."
+
+	ensure
+		@shellmode = false
+		Termios.tcsetattr( $stdin, Termios::TCSANOW, term )
+	end
+	help :shell, "Start the program in interactive mode."
 
 
 	### The 'access' command
@@ -307,9 +390,7 @@ class Mongrel2::M2SHCommand
 		# -> [1315533812] 127.0.0.1:53420 localhost "GET /favicon.ico HTTP/1.1" 404 0
 		IO.foreach( logfile ) do |line|
 			row, _ = TNetstring.parse( line )
-			output = %{[%4$d] %2$s:%3$d %1$s "%5$s %6$s %7$s" %8$03d %9$d} % row
-
-			self.prompt.say( output )
+			message %{[%4$d] %2$s:%3$d %1$s "%5$s %6$s %7$s" %8$03d %9$d} % row
 		end
 	end
 	help :access, "Dump the access log."
@@ -318,15 +399,13 @@ class Mongrel2::M2SHCommand
 
 	### The 'servers' command
 	def servers_command( * )
-		self.prompt.say( self.prompt.color('SERVERS:', :header) )
+		header 'SERVERS:'
 		Mongrel2::Config.servers.each do |server|
-			msg = "%s  [%s]: %s" % [
+			message "%s  [%s]: %s" % [
 				self.prompt.color( server.name, :key ),
 				server.default_host,
 				server.uuid,
 			]
-
-			self.prompt.say( msg )
 		end
 	end
 	help :servers, "Lists the servers in a config database."
@@ -342,14 +421,15 @@ class Mongrel2::M2SHCommand
 
 		# Output a section for each server
 		servers.each do |server|
-			self.prompt.say( self.prompt.color("HOSTS for server #{server.name}:", :header) )
-
+			header "HOSTS for server #{server.name}:"
 			server.hosts.each do |host|
 				line = "%d: %s" % [ host.id, host.name ]
 				line << " /%s/" % [ host.matching ] if host.matching != host.name
 
-				self.prompt.say( line )
+				message( line )
 			end
+
+			$stdout.puts
 		end
 	end
 	help :hosts, "Lists the hosts in a server, or in all servers if none is specified."
@@ -372,10 +452,10 @@ class Mongrel2::M2SHCommand
 
 		# Output a section for each host
 		hosts.each do |host|
-			self.prompt.say( self.prompt.color("ROUTES for host #{host.server.name}/#{host.name}:", :header) )
+			header "ROUTES for host #{host.server.name}/#{host.name}:"
 
 			host.routes.each do |route|
-				self.prompt.say( route.path )
+				message( route.path )
 			end
 		end
 
@@ -391,8 +471,8 @@ class Mongrel2::M2SHCommand
 
 		log = Mongrel2::Config::Log.log_action( what, where, why, how )
 
-		self.prompt.say( self.prompt.color("Okay, logged.", :header) )
-		self.prompt.say( log.to_s )
+		header "Okay, logged."
+		message( log.to_s )
 	end
 	help :commit, "Add a message to the commit log."
 	usage :commit, "[WHAT [WHERE [WHY [HOW]]]]"
@@ -400,9 +480,9 @@ class Mongrel2::M2SHCommand
 
 	### The 'log' command
 	def log_command( *args )
-		self.prompt.say( self.prompt.color("Log Messages") )
+		header "Log Messages"
 		Mongrel2::Config::Log.order_by( :happened_at ).each do |log|
-			self.prompt.say( log.to_s )
+			message( log.to_s )
 		end
 	end
 	help :log, "Prints the commit log."
@@ -434,8 +514,14 @@ class Mongrel2::M2SHCommand
 
 		raise "No servers match '#{serverspec}'" unless server
 
-
-		exec( 'mongrel2', Mongrel2::Config.pathname.to_s, server.uuid )
+		# Run the command, waiting for it to finish if invoked from shell mode, or
+		# execing it if not.
+		cmd = [ 'mongrel2', Mongrel2::Config.pathname.to_s, server.uuid ]
+		if @shellmode
+			system( *cmd )
+		else
+			exec( *cmd )
+		end
 	end
 	help :start, "Starts a server."
 	usage :start, <<-END_USAGE
@@ -450,9 +536,62 @@ class Mongrel2::M2SHCommand
 
 	### The 'version' command
 	def version_command( *args )
-		self.prompt.say( "<%= color 'Version:', :header %> " + Mongrel2.version_string(true) )
+		message( "<%= color 'Version:', :header %> " + Mongrel2.version_string(true) )
 	end
 	help :version, "Prints the Ruby-Mongrel2 version."
+
+
+	#
+	# Utility methods
+	#
+
+	### Output normal output
+	def message( *parts )
+		self.prompt.say( parts.map(&:to_s).join($/) )
+	end
+
+
+	### Output the given +text+ highlighted as a header.
+	def header( text )
+		message( self.prompt.color(text, :header) )
+	end
+
+
+	### Output the given +text+ highlighted as an error.
+	def error( text )
+		message( self.prompt.color(text, :error) )
+	end
+
+
+	### Read command line history from HISTORY_FILE
+	def read_history
+		histfile = HISTORY_FILE.expand_path
+
+		if histfile.exist?
+			lines = histfile.readlines.collect {|line| line.chomp }
+			self.log.debug "Read %d saved history commands from %s." % [ lines.length, histfile ]
+			Readline::HISTORY.push( *lines )
+		else
+			self.log.debug "History file '%s' was empty or non-existant." % [ histfile ]
+		end
+	end
+
+
+	### Save command line history to HISTORY_FILE
+	def save_history
+		histfile = HISTORY_FILE.expand_path
+
+		lines = Readline::HISTORY.to_a.reverse.uniq.reverse
+		lines = lines[ -DEFAULT_HISTORY_SIZE, DEFAULT_HISTORY_SIZE ] if
+			lines.length > DEFAULT_HISTORY_SIZE
+
+		self.log.debug "Saving %d history lines to %s." % [ lines.length, histfile ]
+
+		histfile.open( File::WRONLY|File::CREAT|File::TRUNC ) do |ofh|
+			ofh.puts( *lines )
+		end
+	end
+
 
 end # class Mongrel2::M2SHCommand
 
