@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'uri'
 require 'yajl'
 require 'tnetstring'
 
@@ -83,6 +84,146 @@ module Mongrel2::TestConstants # :nodoc:all
 			:path    => TEST_JSON_PATH,
 			:body    => TEST_JSON_BODY,
 		}
+
+
+		#
+		# XML message request constants
+		#
+
+		TEST_XML_PATH = '<directory'
+
+		TEST_XML_HEADERS = {
+			'PATH'            => TEST_XML_PATH,
+			'x-forwarded-for' => "127.0.0.1",
+			'METHOD'          => "XML",
+			'PATTERN'         => TEST_XML_PATH,
+		}
+		TEST_XML_BODY = '<directory><file name="foom.txt" /><file name="foom2.md" /></directory>'
+
+		TEST_XML_REQUEST_OPTS = {
+			:uuid    => TEST_UUID,
+			:id      => TEST_ID,
+			:path    => TEST_XML_PATH,
+			:body    => TEST_XML_BODY,
+		}
+
+
+		#
+		# HTTP constants
+		#
+
+		# Space
+		SP = '\\x20'
+
+		# Network EOL
+		CRLF = '\\r\\n'
+
+		# Pattern to match the contents of ETag and If-None-Match headers
+		ENTITY_TAG_PATTERN = %r{
+			(w/)?       # Weak flag
+			"           # Opaque-tag
+				([^"]+) # Quoted-string
+			"           # Closing quote
+		  }ix
+
+		# Separators    = "(" | ")" | "<" | ">" | "@"
+		#                  | "," | ";" | ":" | "\" | <">
+		#                  | "/" | "[" | "]" | "?" | "="
+		#                  | "{" | "}" | SP | HT
+		SEPARATORS = Regexp.quote("(\")<>@,;:\\/[]?={} \t")
+
+		# token         = 1*<any CHAR except CTLs or separators>
+		TOKEN = /[^#{SEPARATORS}[:cntrl:]]+/
+
+		# Borrow URI's pattern for matching absolute URIs
+		REQUEST_URI = URI::REL_URI_REF
+
+		# Canonical HTTP methods
+		REQUEST_METHOD = /OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT/
+
+		# Extension HTTP methods
+		# extension-method = token
+		EXTENSION_METHOD = TOKEN
+
+		# HTTP-Version   = "HTTP" "/" 1*DIGIT "." 1*DIGIT
+		HTTP_VERSION = %r{HTTP/(\d+\.\d+)}
+
+		# LWS            = [CRLF] 1*( SP | HT )
+		LWS = /#{CRLF}[ \t]+/
+
+		# TEX            = <any OCTET except CTLs, but including LWS>
+		TEXT = /[^[:cntrl:]]|#{LWS}/
+
+		# Reason-Phrase  = *<TEXT, excluding CR, LF>
+		REASON_PHRASE = %r{[^[:cntrl:]]+}
+
+		# Pattern to match HTTP response lines
+		#	Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
+		HTTP_RESPONSE_LINE = %r{
+			(?<http_version>#{HTTP_VERSION})
+			#{SP}
+			(?<status_code>\d{3})
+			#{SP}
+			(?<reason_phrase>#{REASON_PHRASE})
+			#{CRLF}
+		}x
+
+		# message-header = field-name ":" [ field-value ]
+		# field-name     = token
+		# field-value    = *( field-content | LWS )
+		# field-content  = <the OCTETs making up the field-value
+		#                  and consisting of either *TEXT or combinations
+		#                  of token, separators, and quoted-string>
+
+		# Pattern to match a single header tuple, possibly split over multiple lines
+		HEADER_LINE = %r{
+			^
+			#{TOKEN}
+			:
+			(?:#{LWS}|#{TEXT})*
+			#{CRLF}
+		}mx
+
+		# entity-body	 = *OCTET
+		MESSAGE_BODY = /.*/
+
+		# Pattern to match an entire HTTP response
+		#   Response      = Status-Line               ; Section 6.1
+		#                   *(( general-header        ; Section 4.5
+		#                    | response-header        ; Section 6.2
+		#                    | entity-header ) CRLF)  ; Section 7.1
+		#                   CRLF
+		#                   [ message-body ]          ; Section 7.2
+		HTTP_RESPONSE = %r{
+			^
+			(?<response_line>#{HTTP_RESPONSE_LINE})
+			(?<headers>#{HEADER_LINE}*)
+			#{CRLF}
+			(?<message_body>#{MESSAGE_BODY})
+		}x
+
+		# wkday        = "Mon" | "Tue" | "Wed"
+		#              | "Thu" | "Fri" | "Sat" | "Sun"
+		WKDAY =	 Regexp.union( %w[Mon Tue Wed Thu Fri Sat Sun] )
+
+		# month        = "Jan" | "Feb" | "Mar" | "Apr"
+		#              | "May" | "Jun" | "Jul" | "Aug"
+		#              | "Sep" | "Oct" | "Nov" | "Dec"
+		MONTH = Regexp.union( %w[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec] ) 
+
+		# Match an RFC1123 "HTTP date"
+		# rfc1123-date = wkday "," SP date1 SP time SP "GMT"
+		# date1        = 2DIGIT SP month SP 4DIGIT
+		#                ; day month year (e.g., 02 Jun 1982)
+		# time         = 2DIGIT ":" 2DIGIT ":" 2DIGIT
+		#                ; 00:00:00 - 23:59:59
+		HTTP_DATE = %r{
+			#{WKDAY} , #{SP}
+			\d{2} #{SP}
+			#{MONTH} #{SP}
+			\d{4} #{SP}
+			\d{2} : \d{2} : \d{2} #{SP} GMT
+		}x
 
 
 		# Freeze all testing constants

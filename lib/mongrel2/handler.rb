@@ -156,13 +156,13 @@ class Mongrel2::Handler
 	def start_accepting_requests
 		until @conn.closed?
 			req = @conn.receive
-			self.log.info "%p from %s:%d" % [ req.class, req.sender_id, req.conn_id ]
+			self.log.info "%p via %s:%d" % [ req.class, req.sender_id, req.conn_id ]
 
 			res = self.dispatch_request( req )
 
 			if res
 				self.log.debug "  responding with a %p" % [ res.class ]
-				@conn.reply( res )
+				@conn.reply( res ) unless @conn.closed?
 			else
 				self.log.debug "  no response; ignoring."
 			end
@@ -179,21 +179,36 @@ class Mongrel2::Handler
 	def dispatch_request( request )
 		if request.is_disconnect?
 			self.log.debug "disconnect!"
-			return self.handle_disconnect( request )
+			self.handle_disconnect( request )
+			return nil
 
 		else
-			return case request
-				when Mongrel2::HTTPRequest
-					self.handle( request )
-				when Mongrel2::JSONRequest
-					self.handle_json( request )
-				when Mongrel2::XMLRequest
-					self.handle_xml( request )
-				else
-					self.log.error "Unhandled request type %p" % [ request.class ]
-					nil
-				end
+			case request
+			when Mongrel2::HTTPRequest
+				self.log.debug "HTTP request."
+				return self.handle( request )
+			when Mongrel2::JSONRequest
+				self.log.debug "JSON message request."
+				return self.handle_json( request )
+			when Mongrel2::XMLRequest
+				self.log.debug "XML message request."
+				return self.handle_xml( request )
+			else
+				self.log.error "Unhandled request type %p" % [ request.class ]
+				return nil
+			end
 		end
+	end
+
+
+	### Returns a string containing a human-readable representation of the Handler suitable
+	### for debugging.
+	def inspect
+		return "#<%p:0x%08x conn: %p>" % [
+			self.class,
+			self.object_id * 2,
+			self.conn,
+		]
 	end
 
 
@@ -208,7 +223,6 @@ class Mongrel2::Handler
 	### The main handler function: handle the specified HTTP +request+ (a Mongrel2::Request) and
 	### return a response (Mongrel2::Response). If not overridden, this method returns a
 	### '204 No Content' response.
-	### :group: Handler Methods
 	def handle( request )
 		self.log.warn "No default handler; responding with '204 No Content'"
 		response = request.response
@@ -220,26 +234,24 @@ class Mongrel2::Handler
 
 	### Handle a JSON message +request+. If not overridden, JSON message ('@route') 
 	### requests are ignored.
-	### :group: Handler Methods
 	def handle_json( request )
-		self.log.warn "Unhandled JSON message request (%p)" % [ request.headers[:method] ]
+		self.log.warn "Unhandled JSON message request (%p)" % [ request.headers[:path] ]
 		return nil
 	end
 
 
 	### Handle an XML message +request+. If not overridden, XML message ('<route') 
 	### requests are ignored.
-	### :group: Handler Methods
 	def handle_xml( request )
-		self.log.warn "Unhandled XML message request (%p)" % [ request.headers[:method] ]
+		self.log.warn "Unhandled XML message request (%p)" % [ request.headers[:path] ]
 		return nil
 	end
 
 
 	### Handle a disconnect notice from Mongrel2 via the given +request+. Its return value
 	### is ignored.
-	### :group: Handler Methods
 	def handle_disconnect( request )
+		self.log.warn "Unhandled disconnect notice."
 		return nil
 	end
 

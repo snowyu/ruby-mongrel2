@@ -60,10 +60,12 @@ class Mongrel2::Connection
 
 		self.log.info "Connecting request socket (%s)" % [ @sub_addr ]
 		@request_sock  = ctx.socket( ZMQ::PULL )
+		@request_sock.setsockopt( ZMQ::LINGER, 0 )
 		@request_sock.connect( @sub_addr )
 
 		self.log.info "Connecting response socket (%s)" % [ @pub_addr ]
 		@response_sock  = ctx.socket( ZMQ::PUB )
+		@response_sock.setsockopt( ZMQ::LINGER, 0 )
 		@response_sock.setsockopt( ZMQ::IDENTITY, @app_id )
 		@response_sock.connect( @pub_addr )
 	end
@@ -130,16 +132,23 @@ class Mongrel2::Connection
 	end
 
 
-	### Tell the server to close the connection the +request+ was from.
-	def send_close( request )
-		self.send( request.sender_id, request.conn_id, '' )
+	### Tell the server to close the connection associated with the given +sender_id+ and
+	### +conn_id+.
+	def send_close( sender_id, conn_id )
+		self.send( sender_id, conn_id, '' )
+	end
+
+
+	### Tell the server to close the connection associated with the given +request_or_response+.
+	def reply_close( request_or_response )
+		self.send_close( request_or_response.sender_id, request_or_response.conn_id )
 	end
 
 
 	### Tell the server associated with +sender_id+ to close the connections associated 
 	### with +conn_ids+.
-	def broadcast_close( sender_id, conn_ids )
-		self.broadcast( sender_id, conn_ids, '' )
+	def broadcast_close( sender_id, *conn_ids )
+		self.broadcast( sender_id, conn_ids.flatten, '' )
 	end
 
 
@@ -156,6 +165,31 @@ class Mongrel2::Connection
 	def closed?
 		return @closed
 	end
+
+
+	### Returns a string containing a human-readable representation of the Connection,
+	### suitable for debugging.
+	def inspect
+		state = if @request_socket
+			if self.closed?
+				"closed"
+			else
+				"connected"
+			end
+		else
+			"not connected"
+		end
+
+		return "#<%p:0x%08x {%s} %s <-> %s (%s)>" % [
+			self.class,
+			self.object_id * 2,
+			self.app_id,
+			self.sub_addr,
+			self.pub_addr,
+			state,
+		]
+	end
+
 
 
 	#########

@@ -27,14 +27,25 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 
 	### Set up a few things specific to HTTP responses
 	def initialize( sender_id, conn_id, body='', headers={} ) # :notnew:
-		super
+		if body.is_a?( Hash )
+			headers = body
+			body = ''
+		end
+
+		super( sender_id, conn_id, body )
+
+		@headers = Mongrel2::Table.new( headers )
 		@status = nil
+		self.reset
 	end
 
 
 	######
 	public
 	######
+
+	# The response headers (a Mongrel2::Table)
+	attr_reader :headers
 
 	# The HTTP status code
 	attr_accessor :status

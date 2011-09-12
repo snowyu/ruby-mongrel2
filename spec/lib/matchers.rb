@@ -12,7 +12,6 @@ BEGIN {
 
 require 'rspec'
 require 'mongrel2'
-require 'spec/lib/constants'
 
 
 ### RSpec matchers for Mongrel2 specs

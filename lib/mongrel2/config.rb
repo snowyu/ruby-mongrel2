@@ -171,6 +171,7 @@ module Mongrel2
 			dburi = URI( self.db.uri )
 			pathname = dburi.path
 			pathname.slice!( 0, 1 ) if pathname.start_with?( '/' )
+			return nil if pathname.empty?
 			return Pathname( pathname )
 		end
 

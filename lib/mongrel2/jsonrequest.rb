@@ -19,6 +19,7 @@ class Mongrel2::JSONRequest < Mongrel2::Request
 		super
 		self.log.debug "Parsing JSON request body"
 		@data = Yajl.load( body )
+		self.log.debug "  body is: %p" % [ @data ]
 	end
 
 

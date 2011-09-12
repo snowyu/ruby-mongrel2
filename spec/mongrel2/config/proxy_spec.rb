@@ -12,7 +12,6 @@ BEGIN {
 
 require 'rspec'
 
-require 'spec/lib/constants'
 require 'spec/lib/helpers'
 
 require 'mongrel2'
