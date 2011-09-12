@@ -1,11 +1,11 @@
 
 = Ruby-Mongrel2
 
-* https://bitbucket.org/ged/ruby-mongrel2
+* http://deveiate.org/projects/Ruby-Mongrel2/
 
 == Description
 
-A Ruby connector for Mongrel2[http://mongrel2.org/].
+A complete Ruby connector for Mongrel2[http://mongrel2.org/].
 
 This library includes configuration-database ORM classes, a Ruby
 implementation of the 'm2sh' tool, a configuration DSL for generating config
