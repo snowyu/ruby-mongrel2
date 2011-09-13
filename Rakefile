@@ -50,7 +50,10 @@ task 'hg:precheckin' => :spec
 file '.hg/branch'
 file 'ChangeLog' => '.hg/branch' do |task|
 	$stderr.puts "Updating the changelog..."
-	content = make_changelog()
+	abort "Can't create the ChangeLog without hoe-mercurial (gem install hoe-mercurial)" unless
+		defined?( MercurialHelpers )
+
+	content = MercurialHelpers.make_changelog()
 	File.open( task.name, 'w', 0644 ) do |fh|
 		fh.print( content )
 	end
