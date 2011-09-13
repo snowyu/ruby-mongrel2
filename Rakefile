@@ -30,7 +30,7 @@ hoespec = Hoe.spec 'mongrel2' do
 	self.dependency 'amalgalite', '~> 1.1'
 	self.dependency 'tnetstring', '~> 0.3'
 	self.dependency 'yajl-ruby',  '~> 0.8'
-	self.dependency 'zmq',        '~> 2.1.3.1'
+	self.dependency 'zmq',        '~> 2.1.3'
 
 	self.dependency 'configurability', '~> 1.0', :developer
 	self.dependency 'rspec',           '~> 2.4', :developer

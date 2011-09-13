@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'zmq'
+
 require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/config'
 
