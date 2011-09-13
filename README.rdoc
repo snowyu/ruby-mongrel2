@@ -9,7 +9,8 @@ A complete Ruby connector for Mongrel2[http://mongrel2.org/].
 
 This library includes configuration-database ORM classes, a Ruby
 implementation of the 'm2sh' tool, a configuration DSL for generating config
-databases in pure Ruby, a Control port interface object, handler classes for creating applications or higher-level frameworks.
+databases in pure Ruby, a Control port interface object, and handler classes 
+for creating applications or higher-level frameworks.
 
 It differs from the original Mongrel2 Ruby library (m2r), and the
 mongrel2-rack library in several ways:
@@ -110,23 +111,17 @@ used to stop and restart the server, check its status, etc.
 
 === Other Classes
 
-There are a few other classes and modules, too:
+There are a few other classes and modules work checking out, too:
 
-[Mongrel2::Constants]
-  A collection of constants used throughout the rest of the library.
-[Mongrel2::Loggable]
-  A mixin for adding logging methods to a class.
-[Mongrel2::Table]
-  A case-insensitive hash-like object class that can store multiple values per 
-  key, and serialize itself into RFC822-style headers. Used for 
-  request[rdoc-ref:Mongrel2::Request#headers] and 
-  response[rdoc-ref:Mongrel2::Response#headers] headers.
+* Mongrel2::Table
+* Mongrel2::Constants
+* Mongrel2::Loggable
 
 
 == Contributing
 
 You can check out the current development source with Mercurial via its
-{Bitbucket project}[https://bitbucket.org/ged/ruby-mongrel2]. Or if you 
+{Trac project}[http://deveiate.org/projects/Ruby-Mongrel2]. Or if you 
 prefer Git, via {its Github mirror}[https://github.com/ged/ruby-mongrel2].
 
 After checking out the source, run:
