@@ -17,7 +17,7 @@ Hoe.plugin :signing
 
 Hoe.plugins.delete :rubyforge
 
-hoespec = Hoe.spec 'Mongrel2' do
+hoespec = Hoe.spec 'mongrel2' do
 	self.readme_file = 'README.rdoc'
 	self.history_file = 'History.rdoc'
 	self.extra_rdoc_files << 'README.rdoc' << 'History.rdoc'
