@@ -24,16 +24,10 @@ class Mongrel2::Response
 
 
 	### Create a new Response object for the specified +sender_id+, +conn_id+, and +body+.
-	def initialize( sender_id, conn_id, body='', headers={} )
-		if body.is_a?( Hash )
-			headers = body
-			body = ''
-		end
-
+	def initialize( sender_id, conn_id, body='' )
 		@sender_id = sender_id
 		@conn_id   = conn_id
 		@body      = body
-		@headers   = Mongrel2::Table.new( headers )
 	end
 
 
@@ -48,9 +42,6 @@ class Mongrel2::Response
 	# The response's connection ID; this corresponds to the identifier of the connection
 	# the response will be routed to by the mongrel2 server
 	attr_accessor :conn_id
-
-	# The response headers (a Mongrel2::Table)
-	attr_reader :headers
 
 	# The body of the response
 	attr_accessor :body
@@ -67,8 +58,14 @@ class Mongrel2::Response
 	### Write the given +objects+ to the response body, calling #to_s on each one.
 	def puts( *objects )
 		objects.each do |obj|
-			self << obj.to_s
+			self << obj.to_s.chomp << $/
 		end
+	end
+
+
+	### Stringify the response, which just returns its body.
+	def to_s
+		return self.body
 	end
 
 end # class Mongrel2::Response

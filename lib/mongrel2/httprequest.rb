@@ -26,11 +26,23 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 	### 'Connection' header indicates that the connection should stay
 	### open.
 	def keepalive?
-		return false if self.headers[:version] == 'HTTP/1.0'
+		unless self.headers[:version] == 'HTTP/1.1'
+			self.log.debug "Not an http/1.1 request: not persistent"
+			return false
+		end
+		conn_header = self.headers[:connection]
+		if !conn_header
+			self.log.debug "No Connection header: assume persistence"
+			return true
+		end
 
-		ka_header = self.headers[:connection]
-		return !ka_header.nil? && ka_header =~ /keep-alive/i
-		return false
+		if conn_header.split( /\s*,\s*/ ).include?( 'close' )
+			self.log.debug "Connection: close header."
+			return false
+		else
+			self.log.debug "Connection header didn't contain 'close': assume persistence"
+			return true
+		end
 	end
 
 end # class Mongrel2::HTTPRequest

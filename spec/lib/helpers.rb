@@ -13,11 +13,12 @@ BEGIN {
 
 # SimpleCov test coverage reporting; enable this using the :coverage rake task
 if ENV['COVERAGE']
+	$stderr.puts "\n\n>>> Enabling coverage report.\n\n"
 	require 'simplecov'
 	SimpleCov.start do
 		add_filter 'spec'
 		add_group "Config Classes" do |file|
-			file.filename =~ %r{/config/}
+			file.filename =~ %r{lib/mongrel2/config(\.rb|/.*)$}
 		end
 		add_group "Needing tests" do |file|
 			file.covered_percent < 90
@@ -42,43 +43,6 @@ require 'sequel/model'
 
 require 'spec/lib/constants'
 require 'spec/lib/matchers'
-
-### IRb.start_session, courtesy of Joel VanderWerf in [ruby-talk:42437].
-require 'irb'
-require 'irb/completion'
-
-module IRB # :nodoc:
-	def self.start_session( obj )
-		unless @__initialized
-			args = ARGV
-			ARGV.replace( ARGV.dup )
-			IRB.setup( nil )
-			ARGV.replace( args )
-			@__initialized = true
-		end
-
-		workspace = WorkSpace.new( obj )
-		irb = Irb.new( workspace )
-
-		@CONF[:IRB_RC].call( irb.context ) if @CONF[:IRB_RC]
-		@CONF[:MAIN_CONTEXT] = irb.context
-
-		begin
-			prevhandler = Signal.trap( 'INT' ) do
-				irb.signal_handle
-			end
-
-			catch( :IRB_EXIT ) do
-				irb.eval_input
-			end
-		ensure
-			Signal.trap( 'INT', prevhandler )
-		end
-
-	end
-end
-
-
 
 
 ### RSpec helper functions.
@@ -160,92 +124,6 @@ module Mongrel2::SpecHelpers
 	end
 
 
-	### Set up a Mongrel2 server instance.
-	def setup_testing_mongrel_instance( uuid, req_addr, req_spec, res_addr, res_spec='' )
-		spec_tmpdir      = Pathname( Dir.pwd ) + 'spec_tmp'
-		config_db_path   = spec_tmpdir + 'connspec-config.sqlite'
-		m2_rundir        = spec_tmpdir + 'run'
-		m2_tmpdir        = spec_tmpdir + 'tmp'
-		logfile          = spec_tmpdir + 'startup.log'
-
-		m2_rundir.mkpath
-		m2_tmpdir.mkpath
-
-		logfh = logfile.open( File::WRONLY|File::CREAT|File::APPEND )
-		logfh.puts ">>> Config is: #{config_db_path}"
-
-		logfh.puts "Configuring the configdb."
-		Mongrel2::Config.configure( :configdb => config_db_path.to_s )
-		logfh.puts "Forcefully installing the config schema."
-		Mongrel2::Config.init_database!
-
-		# Generate the config (Mongrel2::Config::Server) and store it as a global
-		logfh.print "Generating a config..."
-		server( uuid ) do
-		    name 'ruby-mongrel2 spec config'
-		    chroot( spec_tmpdir.to_s )
-		    access_log '/tmp/access.log'
-		    error_log  '/tmp/error.log'
-		    pid_file '/tmp/mongrel2.pid'
-		    default_host 'localhost'
-		    port 36677
-
-		    host 'localhost' do
-				route '/', directory( 'data/mongrel2/', 'README.txt' )
-				route '/handler', handler( req_addr, req_spec, res_addr, res_spec )
-			end
-		end
-		logfh.puts "done."
-
-		logfh.puts "About to fork."
-		logfh.flush
-
-		if pid = fork
-			logfh.close
-		else
-			Dir.chdir( spec_tmpdir )
-			logfh.puts "About to exec( mongrel2, #{config_db_path.to_s.dump}, #{uuid.dump} )"
-			$stdout.reopen( logfh )
-			$stderr.reopen( $stdout )
-			exec( 'mongrel2', config_db_path.to_s, uuid )
-			$stderr.puts "Failed to exec(mongrel2)!"
-			raise "This should only happen if mongrel2 isn't exec()able."
-		end
-
-		return pid
-	end
-
-
-	### Check to see if the process at +pid+ is alive, returning +true+ if so.
-	def process_is_alive?( pid )
-		Process.kill( 0, pid )
-	rescue Errno::ESRCH
-		Mongrel2.log.info "No such pid #{pid}"
-		false
-	end 
-
-
-	### Stop the Mongrel2 instance running at +pid+, if it's alive, and return either when it's
-	### dead or after three tries.
-	def teardown_testing_mongrel_instance( pid )
-		tries = 0
-
-		while process_is_alive?( @pid ) && tries <= 3
-			Mongrel2.log.info "Signalling PID #@pid..."
-			Process.kill( :TERM, @pid )
-			tries += 1
-
-			Mongrel2.log.info "  waiting..."
-			return true if Process.waitpid( @pid, Process::WNOHANG )
-
-			sleep 0.5
-		end
-
-		Mongrel2.log.info "PID #{@pid} wouldn't die." if tries > 3
-		return false
-	end
-
-
 	### Normalize and fill in missing members for the given +opts+.
 	def normalize_headers( opts, defaults=TEST_HEADERS )
 		headers = defaults.merge( opts[:headers] || {} )
@@ -261,8 +139,8 @@ module Mongrel2::SpecHelpers
 
 	### Make a raw Mongrel2 request from the specified +opts+ and return it as a String.
 	def make_request( opts={} )
-		headers = normalize_headers( opts )
 		opts = TEST_REQUEST_OPTS.merge( opts )
+		headers = normalize_headers( opts )
 
 		headerstring = TNetstring.dump( Yajl::Encoder.encode(headers) )
 		bodystring = TNetstring.dump( opts[:body] || '' )
@@ -308,6 +186,28 @@ module Mongrel2::SpecHelpers
 
 		headerstring = TNetstring.dump( Yajl::Encoder.encode(headers) )
 		bodystring = TNetstring.dump( Yajl::Encoder.encode(opts[:body] || []) )
+
+		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
+		return "%s %d %s %s%s" % [
+			opts[:uuid],
+			opts[:id],
+			opts[:path],
+			headerstring,
+			bodystring,
+		]
+	end
+
+
+	### Make a Mongrel2 request for an XML route.
+	def make_xml_request( opts={} )
+		opts = TEST_XML_REQUEST_OPTS.merge( opts )
+		headers = normalize_headers( opts, TEST_XML_HEADERS )
+		headers.delete( 'URI' ) # XML requests don't have one
+
+		Mongrel2.log.debug "XML request, headers = %p, opts = %p" % [ headers, opts ]
+
+		headerstring = TNetstring.dump( Yajl::Encoder.encode(headers) )
+		bodystring = TNetstring.dump( opts[:body] || "#{TEST_XML_PATH} />" )
 
 		# UUID ID PATH SIZE:HEADERS,SIZE:BODY,
 		return "%s %d %s %s%s" % [

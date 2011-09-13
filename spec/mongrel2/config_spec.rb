@@ -12,7 +12,6 @@ BEGIN {
 
 require 'rspec'
 
-require 'spec/lib/constants'
 require 'spec/lib/helpers'
 
 require 'mongrel2'
@@ -85,6 +84,16 @@ describe Mongrel2::Config do
 
 		Mongrel2::Config.should_not_receive( :load_config_schema )
 		Mongrel2::Config.init_database
+	end
+
+	it "can return the path to the config DB as a Pathname if it's pointing at a file" do
+		Mongrel2::Config.db = Mongrel2::Config.adapter_method[ 'config-spec.sqlite' ]
+		Mongrel2::Config.pathname.should == Pathname( 'config-spec.sqlite' )
+	end
+
+	it "returns nil if asked for the pathname to an in-memory database" do
+		Mongrel2::Config.db = Mongrel2::Config.in_memory_db
+		Mongrel2::Config.pathname.should be_nil()
 	end
 
 	describe "Configurability support", :if => defined?( Configurability ) do

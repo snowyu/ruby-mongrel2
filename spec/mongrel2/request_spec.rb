@@ -13,7 +13,6 @@ BEGIN {
 require 'rspec'
 require 'tnetstring'
 
-require 'spec/lib/constants'
 require 'spec/lib/helpers'
 
 require 'mongrel2'
