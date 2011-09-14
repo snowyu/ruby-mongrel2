@@ -46,6 +46,13 @@ describe Mongrel2::HTTPRequest do
 		result.conn_id.should == @req.conn_id
 	end
 
+	it "remembers its corresponding HTTPResponse if it's created it already" do
+		result = @req.response
+		result.should be_a( Mongrel2::HTTPResponse )
+		result.sender_id.should == @req.sender_id
+		result.conn_id.should == @req.conn_id
+	end
+
 	it "knows that its connection isn't persistent if it's an HTTP/1.0 request" do
 		@req.headers.version = 'HTTP/1.0'
 		@req.should_not be_keepalive()

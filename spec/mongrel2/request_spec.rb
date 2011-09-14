@@ -84,6 +84,10 @@ describe Mongrel2::Request do
 		}.to raise_error( Mongrel2::UnhandledMethodError, /!DIVULGE/ )
 	end
 
+	it "knows what kind of response it should return" do
+		Mongrel2::Request.response_class.should == Mongrel2::Response
+	end
+
 
 	describe "instances" do
 
@@ -97,6 +101,10 @@ describe Mongrel2::Request do
 			result.should be_a( Mongrel2::Response )
 			result.sender_id.should == @req.sender_id
 			result.conn_id.should == @req.conn_id
+		end
+
+		it "remembers its response if it's already made one" do
+			@req.response.should equal( @req.response )
 		end
 
 	end

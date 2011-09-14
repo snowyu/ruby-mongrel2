@@ -19,6 +19,35 @@ class Mongrel2::Request
 	class << self; attr_reader :request_types; end
 
 
+	### Parse the given +raw_request+ from a Mongrel2 server and return an appropriate
+	### request object.
+	def self::parse( raw_request )
+		sender, conn_id, path, rest = raw_request.split( ' ', 4 )
+		Mongrel2.log.debug "Parsing request for %p from %s:%s (rest: %p)" %
+			[ path, sender, conn_id, rest ]
+
+		# Extract the headers and the body, ignore the rest
+		headers, rest = TNetstring.parse( rest )
+		body, _       = TNetstring.parse( rest )
+
+		# Headers will be a JSON String when not using the TNetString protocol
+		if headers.is_a?( String )
+			Mongrel2.log.debug "  parsing old-style headers"
+			headers = Yajl::Parser.parse( headers )
+		end
+
+		# This isn't supposed to happen, but guard against it anyway
+		headers['METHOD'] =~ /^(\w+)$/ or
+			raise Mongrel2::UnhandledMethodError, headers['METHOD']
+		req_method = $1.untaint.to_sym
+		Mongrel2.log.debug "Request method is: %p" % [ req_method ]
+		concrete_class = self.subclass_for_method( req_method )
+
+		return concrete_class.new( sender, conn_id, path, headers, body, raw_request )
+	end
+
+
+
 	### Register the specified +subclass+ as the class to instantiate when the +METHOD+
 	### header is one of the specified +req_methods+. This method exists for frameworks
 	### which wish to provide their own Request types.
@@ -63,34 +92,16 @@ class Mongrel2::Request
 	end
 
 
-	### Parse the given +raw_request+ from a Mongrel2 server and return an appropriate
-	### request object.
-	def self::parse( raw_request )
-		sender, conn_id, path, rest = raw_request.split( ' ', 4 )
-		Mongrel2.log.debug "Parsing request for %p from %s:%s (rest: %p)" %
-			[ path, sender, conn_id, rest ]
-
-		# Extract the headers and the body, ignore the rest
-		headers, rest = TNetstring.parse( rest )
-		body, _       = TNetstring.parse( rest )
-
-		# Headers will be a JSON String when not using the TNetString protocol
-		if headers.is_a?( String )
-			Mongrel2.log.debug "  parsing old-style headers"
-			headers = Yajl::Parser.parse( headers )
-		end
-
-		# This isn't supposed to happen, but guard against it anyway
-		headers['METHOD'] =~ /^(\w+)$/ or
-			raise Mongrel2::UnhandledMethodError, headers['METHOD']
-		req_method = $1.untaint.to_sym
-		Mongrel2.log.debug "Request method is: %p" % [ req_method ]
-		concrete_class = self.subclass_for_method( req_method )
-
-		return concrete_class.new( sender, conn_id, path, headers, body, raw_request )
+	### Return the Mongrel2::Response class that corresponds with the receiver.
+	def self::response_class
+		return Mongrel2::Response
 	end
 
 
+
+	#################################################################
+	###	I N S T A N C E   M E T H O D S
+	#################################################################
 
 	### Create a new Request object with the given +sender_id+, +conn_id+, +path+, +headers+, 
 	### and +body+. The optional +nil+ is for the raw request content, which can be useful
@@ -101,8 +112,9 @@ class Mongrel2::Request
 		@path      = path
 		@headers   = Mongrel2::Table.new( headers )
 		@body      = body
-
 		@raw       = raw
+
+		@response  = nil
 	end
 
 
@@ -134,7 +146,7 @@ class Mongrel2::Request
 	### the receiver. If you wish your specialized Request class to have a corresponding
 	### response type, you can override this method to achieve that.
 	def response
-		return Mongrel2::Response.from_request( self )
+		return @response ||= self.class.response_class.from_request( self )
 	end
 
 	### Return +true+ if the request is a special 'disconnect' notification from Mongrel2.
