@@ -144,10 +144,12 @@ class Mongrel2::Request
 
 	### Create a Mongrel2::Response that will respond to the same server/connection as
 	### the receiver. If you wish your specialized Request class to have a corresponding
-	### response type, you can override this method to achieve that.
+	### response type, you can override the Mongrel2::Request.response_class method 
+	### to achieve that.
 	def response
 		return @response ||= self.class.response_class.from_request( self )
 	end
+
 
 	### Return +true+ if the request is a special 'disconnect' notification from Mongrel2.
 	def is_disconnect?

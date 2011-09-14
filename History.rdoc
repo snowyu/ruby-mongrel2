@@ -1,3 +1,9 @@
+== v0.1.0 [2011-11-14] Michael Granger <ged@FaerieMUD.org>
+
+Memoize Mongrel2::Request#response, and add Mongrel2::Request.response_class to
+allow for easy overriding of the response type.
+
+
 == v0.0.2 [2011-11-13] Michael Granger <ged@FaerieMUD.org>
 
 Added a shim to work around lack of ZMQ::Error in zmq-2.1.3.
