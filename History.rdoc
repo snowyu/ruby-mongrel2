@@ -1,3 +1,8 @@
+== v0.1.1 [2011-11-14] Michael Granger <ged@FaerieMUD.org>
+
+Update dependency to rbzmq-2.1.4 for ZMQ::Error.
+
+
 == v0.1.0 [2011-11-14] Michael Granger <ged@FaerieMUD.org>
 
 Memoize Mongrel2::Request#response, and add Mongrel2::Request.response_class to
