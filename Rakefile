@@ -46,28 +46,10 @@ ENV['VERSION'] ||= hoespec.spec.version.to_s
 # Ensure the specs pass before checking in
 task 'hg:precheckin' => :spec
 
-### Make the ChangeLog update if the repo has changed since it was last built
-file '.hg/branch'
-file 'ChangeLog' => '.hg/branch' do |task|
-	$stderr.puts "Updating the changelog..."
-	abort "Can't create the ChangeLog without hoe-mercurial (gem install hoe-mercurial)" unless
-		defined?( MercurialHelpers )
-
-	content = MercurialHelpers.make_changelog()
-	File.open( task.name, 'w', 0644 ) do |fh|
-		fh.print( content )
-	end
-end
 
 # Rebuild the ChangeLog immediately before release
 task :prerelease => 'ChangeLog'
 
-if Rake::Task.task_defined?( '.gemtest' )
-	Rake::Task['.gemtest'].clear
-	task '.gemtest' do
-		$stderr.puts "Not including a .gemtest until I'm confident the test suite is idempotent."
-	end
-end
 
 desc "Build a coverage report"
 task :coverage do
