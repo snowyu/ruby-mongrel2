@@ -2,14 +2,6 @@
 
 require 'zmq'
 
-# Workaround for rbzmq <= 2.3.0
-unless defined?( ZMQ::Error )
-	module ZMQ
-		Error = ::RuntimeError
-	end
-end
-
-
 #
 # A Mongrel2 connector and configuration library for Ruby.
 # 
@@ -69,4 +61,13 @@ module Mongrel2
 	require 'mongrel2/control'
 
 end # module Mongrel2
+
+
+# Workaround for rbzmq <= 2.3.0
+unless defined?( ZMQ::Error )
+	module ZMQ
+		Error = ::RuntimeError
+	end
+end
+
 
