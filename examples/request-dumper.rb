@@ -34,12 +34,13 @@ class RequestDumper < Mongrel2::Handler
 		return response
 	end
 
-end # class HelloWorldHandler
+end # class RequestDumper
 
-Mongrel2.log.level = Logger::INFO
+Mongrel2.log.level = $DEBUG ? Logger::DEBUG : Logger::INFO
+Inversion.log.level = Logger::INFO
 
 # Point to the config database, which will cause the handler to use
 # its ID to look up its own socket info.
-Mongrel2::Config.configure( :configdb => 'examples.sqlite' )
+Mongrel2::Config.configure( :configdb => 'config.sqlite' )
 RequestDumper.run( 'request-dumper' )
 

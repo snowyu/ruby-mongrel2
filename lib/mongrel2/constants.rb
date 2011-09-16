@@ -149,9 +149,6 @@ module Mongrel2::Constants
 		    510 => "Not Extended"
 		}
 
-
-		# Methods which aren't allowed to have an entity-body
-		SHALLOW_METHODS = [ :GET, :HEAD, :DELETE ]
 	end
 
 

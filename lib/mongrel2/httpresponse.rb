@@ -34,9 +34,11 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 
 		super( sender_id, conn_id, body )
 
-		@headers = Mongrel2::Table.new( headers )
+		@headers = Mongrel2::Table.new
 		@status = nil
 		self.reset
+
+		@headers.merge!( headers )
 	end
 
 
@@ -138,10 +140,12 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 
 	### Return the current response header as a valid HTTP string.
 	def header_data
-		self.headers[:date] ||= Time.now.httpdate
-		self.headers[:content_length] ||= self.get_content_length
+		headers = self.headers.dup
 
-		return self.headers.to_s
+		headers[:date] ||= Time.now.httpdate
+		headers[:content_length] ||= self.get_content_length
+
+		return headers.to_s
 	end
 
 

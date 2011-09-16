@@ -30,7 +30,7 @@ describe Mongrel2::HTTPResponse do
 	end
 
 	before( :each ) do
-		@response = Mongrel2::HTTPResponse.new( TEST_UUID, 299 )
+		@response = Mongrel2::HTTPResponse.new( TEST_UUID, 299, :content_type => 'text/html' )
 	end
 
 	after( :all ) do
@@ -42,13 +42,25 @@ describe Mongrel2::HTTPResponse do
 		@response.headers.should be_a( Mongrel2::Table )
 	end
 
+	it "allows headers to be set when the response is created" do
+		@response.headers.content_type.should == 'text/html'
+	end
+
 	it "is a status 200 response if not set otherwise" do
 		@response.status_line.should == 'HTTP/1.1 200 OK'
 	end
 
 	it "sets Date and Content-length headers automatically if they haven't been set" do
-		@response.header_data.should =~ /Content-length: 0/i
+		@response << "Some stuff."
+
+		@response.header_data.should =~ /Content-length: 11/i
 		@response.header_data.should =~ /Date: #{HTTP_DATE}/i
+	end
+
+	it "re-calculates the automatically-added headers when re-rendered" do
+		@response.header_data.should =~ /Content-length: 0/i
+		@response << "More data!"
+		@response.header_data.should =~ /Content-length: 10/i
 	end
 
 	it "doesn't have a body" do
@@ -226,6 +238,11 @@ describe Mongrel2::HTTPResponse do
 	it "can be set to allow pipelining" do
 		@response.keepalive = true
 		@response.should be_keepalive()
+	end
+
+	it "has a puts method for appending objects to the body" do
+		@response.puts( :something_to_sable )
+		@response.body.should == "something_to_sable\n"
 	end
 
 end
