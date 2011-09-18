@@ -22,16 +22,23 @@ class RequestDumper < Mongrel2::Handler
 
 	### Handle a request
 	def handle( request )
-		response = request.response
-		template = @template.dup
+		Thread.new do
+			Thread.current.abort_on_exception = true
+			$SAFE = 1
 
-		template.request = request
+			template = @template.dup
+			response = request.response
 
-		response.status = 200
-		response.headers.content_type = 'text/html'
-		response.puts( template )
+			template.request = request
+			template.title = "Ruby-Mongrel2 Request Dumper"
+			template.safelevel = $SAFE
 
-		return response
+			response.status = 200
+			response.headers.content_type = 'text/html'
+			response.puts( template )
+
+			response
+		end.value
 	end
 
 end # class RequestDumper
@@ -41,6 +48,6 @@ Inversion.log.level = Logger::INFO
 
 # Point to the config database, which will cause the handler to use
 # its ID to look up its own socket info.
-Mongrel2::Config.configure( :configdb => 'config.sqlite' )
+Mongrel2::Config.configure( :configdb => 'examples.sqlite' )
 RequestDumper.run( 'request-dumper' )
 
