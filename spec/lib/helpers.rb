@@ -37,6 +37,7 @@ require 'tmpdir'
 require 'rspec'
 require 'mongrel2'
 require 'mongrel2/config'
+require 'mongrel2/testing'
 
 require 'sequel'
 require 'sequel/model'
@@ -45,7 +46,7 @@ require 'spec/lib/constants'
 require 'spec/lib/matchers'
 
 
-### RSpec helper functions.
+### RSpec helper functions that are used to test Mongrel2 itself.
 module Mongrel2::SpecHelpers
 	include Mongrel2::TestConstants
 
