@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'mongrel2/config'
+include Mongrel2::Config::DSL
+
 # The mongrel.org config from the manual expressed using the DSL
 # instead of the m2sh config file. Diffs of the database dumps look
 # equivalent except for whitespace, route insertion order (not sure
@@ -23,14 +26,12 @@ server '2f62bd5-9e59-49cd-993c-3b6013c28f05' do
 		# a sample of doing some handlers 
     	route '@chat', handler(
 			'tcp://127.0.0.1:9999', 
-			'54c6755b-9628-40a4-9a2d-cc82a816345e', 
-		    'tcp://127.0.0.1:9998'
+			'54c6755b-9628-40a4-9a2d-cc82a816345e'
 		) 
 
 	    route '/handlertest', handler(
 			'tcp://127.0.0.1:9997', 
-			'34f9ceee-cd52-4b7f-b197-88bf2f0ec378', 
-			'tcp://127.0.0.1:9996'
+			'34f9ceee-cd52-4b7f-b197-88bf2f0ec378'
 		) 
 
 		# a sample proxy route 
@@ -40,20 +41,12 @@ server '2f62bd5-9e59-49cd-993c-3b6013c28f05' do
     	route '/', web_app_proxy
 
 		# here's a sample directory 
-		test_directory = directory(
-			'tests/',
-			:index_file => 'index.html',
-			:default_ctype => 'text/plain'
-		)
+		test_directory = directory( 'tests/', 'index.html', 'text/plain' )
 
 		route '/tests/', test_directory
     	route '/testsmulti/(.*.json)', test_directory
 
-		chat_demo_dir = directory(
-			'examples/chat/static/', 
-			:index_file => 'index.html', 
-			:default_ctype => 'text/plain'
-		)
+		chat_demo_dir = directory( 'examples/chat/static/', 'index.html', 'text/plain' )
 
 		route '/chatdemo/', chat_demo_dir
 		route '/static/', chat_demo_dir
@@ -65,20 +58,6 @@ server '2f62bd5-9e59-49cd-993c-3b6013c28f05' do
 		) 
 	end
 
-end
-
-server 'admin' do
-    name 'adminserver'
-	port 8118
-	access_log '/logs/admin-access.log'
-	error_log '/logs/admin-error.log'
-	pid_file '/run/admin.pid'
-
-	default_host 'localhost'
-
-    host 'localhost' do
-        route '/', directory( 'data/admin/', 'index.html' )
-    end
 end
 
 settings(
