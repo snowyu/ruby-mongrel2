@@ -1,0 +1,48 @@
+/* @override http://pelimer.pg.laika.com:8113/css/master.css */
+
+/*
+ * Mongrel2 Examples Stylesheet
+ * $Id$
+ */
+
+html {
+	background: #333;
+	margin: 0;
+}
+
+body {
+	background: ##9d9d9d;
+	background: -moz-linear-gradient(bottom, #aaa 0%, #eee 30%);
+	background: -webkit-gradient(linear, left bottom, left top, 
+		color-stop(0%,#9d9d9d), color-stop(30%,#eee));
+	background: linear-gradient(top, ##9d9d9d 0%,#eee 30%);
+	color: #333;
+	margin: 0;
+	padding: 4em;
+	font-family: Menlo, Monaco, monospace;
+	font-size: 76%;
+	min-width: 785px;
+}
+
+pre, table, code {
+	background-color: rgba( 25,25,200, 0.2 );
+	box-shadow: 0 2px 8px rgba( 50,50,50, 0.25 )
+}
+
+pre {
+	padding: 2px 8px;
+	font-family: Menlo, Monaco, monospace;
+	overflow: hidden;
+}
+table {
+	border-collapse: collapse;
+}
+th, td {
+	padding: 2px 8px;
+	border-bottom: 1px solid rgba( 150,150,150, 0.5 );
+}
+tbody th {
+	text-align: right;
+	vertical-align: top;
+	white-space: pre;
+}

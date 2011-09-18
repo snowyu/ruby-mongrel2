@@ -9,6 +9,8 @@
 
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
+	<link rel="stylesheet" href="/css/master.css" type="text/css" media="screen"
+		title="no title" charset="utf-8" />
 </head>
 
 <body>
@@ -27,6 +29,10 @@
 			<tr>
 				<th>Connection ID</th>
 				<td><?escape request.conn_id.to_s ?></td>
+			</tr>
+			<tr>
+				<th>$SAFE</th>
+				<td><?attr safelevel ?></td>
 			</tr>
 		</table>
 		
@@ -55,9 +61,9 @@
 		<section id="inspect">
 			<header>
 				<h1>Inspected Request</h1>
-				<p><tt>
-					<?pp request ?>
-				</tt></p>
+				<pre>
+<?pp request ?>
+				</pre>
 			</header>
 		</section>
 		
