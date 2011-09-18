@@ -106,7 +106,7 @@ class Mongrel2::Request
 	### Create a new Request object with the given +sender_id+, +conn_id+, +path+, +headers+, 
 	### and +body+. The optional +nil+ is for the raw request content, which can be useful
 	### later for debugging.
-	def initialize( sender_id, conn_id, path, headers, body, raw=nil )
+	def initialize( sender_id, conn_id, path, headers, body='', raw=nil )
 		@sender_id = sender_id
 		@conn_id   = Integer( conn_id )
 		@path      = path
@@ -154,6 +154,35 @@ class Mongrel2::Request
 	### Return +true+ if the request is a special 'disconnect' notification from Mongrel2.
 	def is_disconnect?
 		return false
+	end
+
+
+	### Returns a string containing a human-readable representation of the Request,
+	### suitable for debugging.
+	def inspect
+		return "#<%p:0x%016x %s (%s/%d)>" % [
+			self.class,
+			self.object_id * 2,
+			self.inspect_details,
+			self.sender_id,
+			self.conn_id
+		]
+	end
+
+
+	#########
+	protected
+	#########
+
+	### Return the details to include in the contents of the #inspected object. This
+	### method allows other request types to provide their own details while keeping
+	### the form somewhat consistent.
+	def inspect_details
+		return "%s -- %d headers, %0.2fK body" % [
+			self.path,
+			self.headers.length,
+			self.body.length,
+		]
 	end
 
 end # class Mongrel2::Request

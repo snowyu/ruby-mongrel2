@@ -45,6 +45,22 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 		end
 	end
 
+
+	#########
+	protected
+	#########
+
+	### Return the details to include in the contents of the #inspected object.
+	def inspect_details
+		return %Q{[%s] "%s %s %s" -- %0.2fK body} % [
+			self.headers.x_forwarded_for,
+			self.headers[:method],
+			self.headers.uri,
+			self.headers.version,
+			self.body.length,
+		]
+	end
+
 end # class Mongrel2::HTTPRequest
 
 # vim: set nosta noet ts=4 sw=4:

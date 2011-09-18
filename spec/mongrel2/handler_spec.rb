@@ -25,14 +25,6 @@ require 'mongrel2/handler'
 
 describe Mongrel2::Handler do
 
-	# Testing handler config
-	HANDLER_CONFIG = {
-		:send_spec  => TEST_SEND_SPEC,
-		:send_ident => TEST_UUID,
-		:recv_spec  => TEST_RECV_SPEC,
-	}
-
-
 	# Make a handler class for testing that only ever handles one request, and
 	# keeps track of any requests it handles and their responses.
 	class OneShotHandler < Mongrel2::Handler
@@ -85,8 +77,14 @@ describe Mongrel2::Handler do
 	context "with a Handler entry in the config database" do
 
 		before( :each ) do
+			@handler_config = {
+				:send_spec  => TEST_SEND_SPEC,
+				:send_ident => TEST_UUID,
+				:recv_spec  => TEST_RECV_SPEC,
+			}
+
 			Mongrel2::Config::Handler.dataset.truncate
-			Mongrel2::Config::Handler.create( HANDLER_CONFIG )
+			Mongrel2::Config::Handler.create( @handler_config )
 		end
 
 		it "can look up connection information given an application ID" do

@@ -206,7 +206,7 @@ class Mongrel2::Handler
 	### Returns a string containing a human-readable representation of the Handler suitable
 	### for debugging.
 	def inspect
-		return "#<%p:0x%08x conn: %p>" % [
+		return "#<%p:0x%016x conn: %p>" % [
 			self.class,
 			self.object_id * 2,
 			self.conn,

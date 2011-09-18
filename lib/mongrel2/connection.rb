@@ -180,7 +180,7 @@ class Mongrel2::Connection
 			"not connected"
 		end
 
-		return "#<%p:0x%08x {%s} %s <-> %s (%s)>" % [
+		return "#<%p:0x%016x {%s} %s <-> %s (%s)>" % [
 			self.class,
 			self.object_id * 2,
 			self.app_id,
