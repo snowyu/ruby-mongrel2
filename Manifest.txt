@@ -1,3 +1,6 @@
+.autotest
+.gemtest
+ChangeLog
 History.rdoc
 Manifest.txt
 README.rdoc
@@ -5,6 +8,7 @@ Rakefile
 bin/m2sh.rb
 data/mongrel2/bootstrap.html
 data/mongrel2/config.sql
+data/mongrel2/css/master.css
 data/mongrel2/mimetypes.sql
 examples/README.txt
 examples/config.rb
@@ -38,6 +42,7 @@ lib/mongrel2/mixins.rb
 lib/mongrel2/request.rb
 lib/mongrel2/response.rb
 lib/mongrel2/table.rb
+lib/mongrel2/testing.rb
 lib/mongrel2/xmlrequest.rb
 spec/lib/constants.rb
 spec/lib/helpers.rb
@@ -57,6 +62,7 @@ spec/mongrel2/connection_spec.rb
 spec/mongrel2/constants_spec.rb
 spec/mongrel2/control_spec.rb
 spec/mongrel2/handler_spec.rb
+spec/mongrel2/httprequest_spec.rb
 spec/mongrel2/httpresponse_spec.rb
 spec/mongrel2/logging_spec.rb
 spec/mongrel2/mixins_spec.rb

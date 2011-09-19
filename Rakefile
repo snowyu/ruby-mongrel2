@@ -48,7 +48,7 @@ task 'hg:precheckin' => :spec
 
 
 # Rebuild the ChangeLog immediately before release
-task :prerelease => 'ChangeLog'
+task :prerelease => [:check_manifest, :check_history, 'ChangeLog']
 
 
 desc "Build a coverage report"
