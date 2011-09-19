@@ -1,3 +1,35 @@
+== v0.2.2 [2011-09-19] Michael Granger <ged@FaerieMUD.org>
+
+- Packaging fix
+
+
+== v0.2.1 [2011-09-19] Michael Granger <ged@FaerieMUD.org>
+
+- Add missing HTTP::CONTINUE constant.
+
+
+== v0.2.0 [2011-09-18] Michael Granger <ged@FaerieMUD.org>
+
+- Factor out the generically-useful RSpec helper functions into
+  mongrel2/testing.rb and add a RequestFactory.
+- Fix object ID in inspect output, clean up inspected Request/Response
+  objects.
+- Tightened up the mongrel2.org DSL example, remove the accidentally-
+  committed adminserver part.
+- Request dumper now runs under $SAFE = 1
+- Revert examples back to using examples.sqlite
+- Added a bit of CSS to the examples
+- Config DSL: directory: Default the index file to index.html
+
+
+== v0.1.2 [2011-09-16] Michael Granger <ged@FaerieMUD.org>
+
+Fixed some header problems in Mongrel2::HTTPResponse:
+
+- Re-calculate content-length and date headers on each render.
+- Don't clear headers passed to the constructor.
+
+
 == v0.1.1 [2011-11-14] Michael Granger <ged@FaerieMUD.org>
 
 Update dependency to rbzmq-2.1.4 for ZMQ::Error.
