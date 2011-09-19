@@ -17,27 +17,28 @@ module Mongrel2::Constants
 
 	# HTTP status and result constants
 	module HTTP
-		SWITCHING_PROTOCOLS 		  = 101
-		PROCESSING          		  = 102
+		CONTINUE                      = 100
+		SWITCHING_PROTOCOLS           = 101
+		PROCESSING                    = 102
 
-		OK                			  = 200
-		CREATED           			  = 201
-		ACCEPTED          			  = 202
-		NON_AUTHORITATIVE 			  = 203
-		NO_CONTENT        			  = 204
-		RESET_CONTENT     			  = 205
-		PARTIAL_CONTENT   			  = 206
-		MULTI_STATUS      			  = 207
+		OK                            = 200
+		CREATED                       = 201
+		ACCEPTED                      = 202
+		NON_AUTHORITATIVE             = 203
+		NO_CONTENT                    = 204
+		RESET_CONTENT                 = 205
+		PARTIAL_CONTENT               = 206
+		MULTI_STATUS                  = 207
 
-		MULTIPLE_CHOICES   			  = 300
-		MOVED_PERMANENTLY  			  = 301
-		MOVED              			  = 301
-		MOVED_TEMPORARILY  			  = 302
-		REDIRECT           			  = 302
-		SEE_OTHER          			  = 303
-		NOT_MODIFIED       			  = 304
-		USE_PROXY          			  = 305
-		TEMPORARY_REDIRECT 			  = 307
+		MULTIPLE_CHOICES              = 300
+		MOVED_PERMANENTLY             = 301
+		MOVED                         = 301
+		MOVED_TEMPORARILY             = 302
+		REDIRECT                      = 302
+		SEE_OTHER                     = 303
+		NOT_MODIFIED                  = 304
+		USE_PROXY                     = 305
+		TEMPORARY_REDIRECT            = 307
 
 		BAD_REQUEST                   = 400
 		AUTH_REQUIRED                 = 401
@@ -62,15 +63,15 @@ module Mongrel2::Constants
 		LOCKED                        = 423
 		FAILED_DEPENDENCY             = 424
 
-		SERVER_ERROR          		  = 500
-		NOT_IMPLEMENTED       		  = 501
-		BAD_GATEWAY           		  = 502
-		SERVICE_UNAVAILABLE   		  = 503
-		GATEWAY_TIME_OUT      		  = 504
-		VERSION_NOT_SUPPORTED 		  = 505
-		VARIANT_ALSO_VARIES   		  = 506
-		INSUFFICIENT_STORAGE  		  = 507
-		NOT_EXTENDED          		  = 510
+		SERVER_ERROR                  = 500
+		NOT_IMPLEMENTED               = 501
+		BAD_GATEWAY                   = 502
+		SERVICE_UNAVAILABLE           = 503
+		GATEWAY_TIME_OUT              = 504
+		VERSION_NOT_SUPPORTED         = 505
+		VARIANT_ALSO_VARIES           = 506
+		INSUFFICIENT_STORAGE          = 507
+		NOT_EXTENDED                  = 510
 
 		# Stolen from Apache 2.2.6's modules/http/http_protocol.c
 		STATUS_NAME = {
