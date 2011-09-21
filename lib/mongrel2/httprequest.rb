@@ -57,7 +57,7 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 			self.headers[:method],
 			self.headers.uri,
 			self.headers.version,
-			self.body.length,
+			(self.body.length / 1024.0),
 		]
 	end
 

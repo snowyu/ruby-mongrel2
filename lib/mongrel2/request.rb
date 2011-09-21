@@ -178,10 +178,10 @@ class Mongrel2::Request
 	### method allows other request types to provide their own details while keeping
 	### the form somewhat consistent.
 	def inspect_details
-		return "%s -- %d headers, %0.2fK body" % [
+		return "%s -- %d headers, %p body" % [
 			self.path,
 			self.headers.length,
-			self.body.length,
+			self.body.class,
 		]
 	end
 

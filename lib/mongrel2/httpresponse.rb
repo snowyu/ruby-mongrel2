@@ -195,7 +195,7 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 		return %Q{%s -- %d headers, %0.2fK body} % [
 			self.status_line,
 			self.headers.length,
-			self.get_content_length,
+			(self.get_content_length / 1024.0),
 		]
 	end
 
