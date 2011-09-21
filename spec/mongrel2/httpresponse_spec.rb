@@ -46,8 +46,8 @@ describe Mongrel2::HTTPResponse do
 		@response.headers.content_type.should == 'text/html'
 	end
 
-	it "is a status 200 response if not set otherwise" do
-		@response.status_line.should == 'HTTP/1.1 200 OK'
+	it "is a No Content response if not set otherwise" do
+		@response.status_line.should == 'HTTP/1.1 204 No Content'
 	end
 
 	it "sets Date and Content-length headers automatically if they haven't been set" do

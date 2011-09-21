@@ -16,7 +16,7 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	STATUS_LINE_FORMAT = "HTTP/1.1 %03d %s".freeze
 
 	# The default status
-	DEFAULT_HTTP_STATUS = 200
+	DEFAULT_HTTP_STATUS = 204
 
 	# A network End-Of-Line
 	EOL = "\r\n".freeze

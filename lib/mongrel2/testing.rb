@@ -2,7 +2,8 @@
 
 require 'uri'
 require 'pathname'
-require 'mongrel2' unless defined?( Mongrel2 )
+require 'mongrel2'
+require 'mongrel2/handler'
 
 
 # A collection of constants and functions for testing Mongrel2 applications,
