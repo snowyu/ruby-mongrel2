@@ -68,6 +68,30 @@ class Mongrel2::Response
 		return self.body
 	end
 
+	### Returns a string containing a human-readable representation of the Response,
+	### suitable for debugging.
+	def inspect
+		return "#<%p:0x%016x %s (%s/%d)>" % [
+			self.class,
+			self.object_id * 2,
+			self.inspect_details,
+			self.sender_id,
+			self.conn_id
+		]
+	end
+
+
+	#########
+	protected
+	#########
+
+	### Return the details to include in the contents of the #inspected object. This
+	### method allows other request types to provide their own details while keeping
+	### the form somewhat consistent.
+	def inspect_details
+		return "%p body" % [ self.body.class ]
+	end
+
 end # class Mongrel2::Response
 
 # vim: set nosta noet ts=4 sw=4:

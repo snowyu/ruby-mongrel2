@@ -185,6 +185,20 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	end
 	alias_method :pipelining_enabled?, :keepalive?
 
+
+	#########
+	protected
+	#########
+
+	### Return the details to include in the contents of the #inspected object.
+	def inspect_details
+		return %Q{%s -- %d headers, %0.2fK body} % [
+			self.status_line,
+			self.headers.length,
+			self.get_content_length,
+		]
+	end
+
 end # class Mongrel2::Response
 
 # vim: set nosta noet ts=4 sw=4:
