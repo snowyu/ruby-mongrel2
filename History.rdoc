@@ -1,3 +1,10 @@
+== v0.2.4 [2011-09-21] Michael Granger <ged@FaerieMUD.org>
+
+- Added a cleaned-up Mongrel2::Response#inspect like
+  Mongrel2::Request.
+- Correct body size in inspected request/response output.
+
+
 == v0.2.3 [2011-09-21] Michael Granger <ged@FaerieMUD.org>
 
 - Change the default response status from '200 OK' to '204 No Content'
