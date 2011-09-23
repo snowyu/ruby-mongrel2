@@ -79,7 +79,8 @@ require 'mongrel2/jsonrequest'
 #     app.run
 #     
 class Mongrel2::Handler
-	include Mongrel2::Loggable
+	include Mongrel2::Loggable,
+	        Mongrel2::Constants
 
 
 	### Create an instance of the handler using the config from the database with
