@@ -60,11 +60,13 @@ class Mongrel2::Connection
 
 		self.log.info "Connecting PULL request socket (%s)" % [ @sub_addr ]
 		@request_sock  = ctx.socket( ZMQ::PULL )
+		@request_sock.setsockopt( ZMQ::LINGER, 0 )
 		@request_sock.connect( @sub_addr )
 
 		self.log.info "Connecting PUB response socket (%s)" % [ @pub_addr ]
 		@response_sock  = ctx.socket( ZMQ::PUB )
 		@response_sock.setsockopt( ZMQ::IDENTITY, @app_id )
+		@response_sock.setsockopt( ZMQ::LINGER, 0 )
 		@response_sock.connect( @pub_addr )
 	end
 
