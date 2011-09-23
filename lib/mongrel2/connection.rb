@@ -58,14 +58,12 @@ class Mongrel2::Connection
 		ctx = Mongrel2.zmq_context
 		self.log.debug "0mq Context is: %p" % [ ctx ]
 
-		self.log.info "Connecting request socket (%s)" % [ @sub_addr ]
+		self.log.info "Connecting PULL request socket (%s)" % [ @sub_addr ]
 		@request_sock  = ctx.socket( ZMQ::PULL )
-		@request_sock.setsockopt( ZMQ::LINGER, 0 )
 		@request_sock.connect( @sub_addr )
 
-		self.log.info "Connecting response socket (%s)" % [ @pub_addr ]
+		self.log.info "Connecting PUB response socket (%s)" % [ @pub_addr ]
 		@response_sock  = ctx.socket( ZMQ::PUB )
-		@response_sock.setsockopt( ZMQ::LINGER, 0 )
 		@response_sock.setsockopt( ZMQ::IDENTITY, @app_id )
 		@response_sock.connect( @pub_addr )
 	end
@@ -93,7 +91,7 @@ class Mongrel2::Connection
 	def recv
 		self.check_closed
 
-		self.log.debug "Fetching next request"
+		self.log.debug "Fetching next request (PULL)"
 		data = self.request_sock.recv
 		self.log.debug "  got request data: %p" % [ data ]
 		return data
@@ -112,8 +110,9 @@ class Mongrel2::Connection
 		self.check_closed
         header = "%s %d:%s," % [ sender_id, conn_id.to_s.length, conn_id ]
 		buf = header + ' ' + data
-		self.log.debug "Sending response: %p" % [ buf ]
+		self.log.debug "Sending response (PUB): %p" % [ buf ]
 		self.response_sock.send( buf )
+		self.log.debug "  done with send."
 	end
 
 
