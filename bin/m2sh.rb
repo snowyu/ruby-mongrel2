@@ -2,6 +2,7 @@
 
 require 'pp'
 require 'shellwords'
+require 'fileutils'
 require 'tnetstring'
 
 require 'trollop'
@@ -283,7 +284,7 @@ class Mongrel2::M2SHCommand
 			raise "No configfile specified."
 
 		runspace = Module.new do
-			extend Mongrel2::Config::DSL
+			extend Mongrel2::Config::DSL, FileUtils::Verbose
 		end
 
 		header "Loading config from #{configfile}"
