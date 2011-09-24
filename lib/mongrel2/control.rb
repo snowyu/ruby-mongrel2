@@ -23,6 +23,7 @@ class Mongrel2::Control
 	def initialize( port=DEFAULT_PORT )
 		@ctx = Mongrel2.zmq_context
 		@socket = @ctx.socket( ZMQ::REQ )
+		@socket.setsockopt( ZMQ::LINGER, 0 )
 		@socket.connect( port.to_s )
 	end
 
@@ -35,66 +36,105 @@ class Mongrel2::Control
 	attr_reader :socket
 
 
-	### Stops the server using a SIGINT.
+	### Stops the server using a SIGINT. Returns a hash with a ':msg' key
+	### that describes what happened on success.
 	def stop
 		self.request( :stop )
 	end
 
 
-	### Reloads the server using a SIGHUP.
+	### Reloads the server using a SIGHUP. Returns a hash with a ':msg' key
+	### that describes what happened on success.
 	def reload
 		self.request( :reload )
 	end
+	alias_method :restart, :reload
 
 
-	### Terminates the server with SIGTERM.
+	### Terminates the server with SIGTERM. Returns a hash with a ':msg' key
+	### that describes what happened on success.
 	def terminate
 		self.request( :terminate )
 	end
 
 
-	### Prints out a simple help message.
+	### Return an Array of Hashes, one for each command the server supports.
+	###
+	### Example:
+	###   [
+	###     {:name=>"stop", :help=>"stop the server (SIGINT)"},
+	###     {:name=>"reload", :help=>"reload the server"},
+	###     {:name=>"help", :help=>"this command"},
+	###     {:name=>"control_stop", :help=>"stop control port"},
+	###     {:name=>"kill", :help=>"kill a connection"},
+	###     {:name=>"status", :help=>"status, what=['net'|'tasks']"},
+	###     {:name=>"terminate", :help=>"terminate the server (SIGTERM)"},
+	###     {:name=>"time", :help=>"the server's time"},
+	###     {:name=>"uuid", :help=>"the server's uuid"},
+	###     {:name=>"info", :help=>"information about this server"}
+	###   ]
 	def help
 		self.request( :help )
 	end
 
 
 	### Returns the server’s UUID as a String.
+	###
+	### Example:
+	###   [{:uuid=>"28F6DCCF-28EB-48A4-A5B0-ED71D224FAE0"}]
 	def uuid
 		self.request( :uuid )
 	end
 
 
-	### More information about the server.
+	### Return information about the server.
+	###
+	### Example:
+	###   [{:port=>7337,
+	###     :bind_addr=>"0.0.0.0",
+	###     :uuid=>"28F6DCCF-28EB-48A4-A5B0-ED71D224FAE0",
+	###     :chroot=>"/var/www",
+	###     :access_log=>"/var/www/logs/admin-access.log",
+	###     :error_log=>"/logs/admin-error.log",
+	###     :pid_file=>"./run/admin.pid",
+	###     :default_hostname=>"localhost"}]
 	def info
 		self.request( :info )
 	end
 
 
-	### Returns a Hash of all the currently running tasks and what they’re doing, keyed
-	### by conn_id.
+	### Returns an Array of Hashes, one for each currently running task.
+	###
+	### Example:
+	###   [
+	###     {:id=>1, :system=>false, :name=>"SERVER", :state=>"read fd", :status=>"idle"},
+	###     {:id=>2, :system=>false, :name=>"Handler_task", :state=>"read handler", :status=>"idle"},
+	###     {:id=>3, :system=>false, :name=>"control", :state=>"read handler", :status=>"running"},
+	###     {:id=>4, :system=>false, :name=>"ticker", :state=>"", :status=>"idle"},
+	###     {:id=>5, :system=>true, :name=>"fdtask", :state=>"yield", :status=>"ready"}
+	###   ]
 	def tasklist
 		self.request( :status, :what => 'tasks' )
 	end
 
 
-	### Dumps a JSON dict that matches connections IDs (same ones your handlers 
-	### get) to the seconds since their last ping. In the case of an HTTP 
-	### connection this is how long they’ve been connected. In the case of a 
-	### JSON socket this is the last time a ping message was received.
+	### Returns an Array of Hashes, one for each connection to the server.
+	###
+	### Example:
+	###   [
+	###     {:id=>9, :fd=>27, :type=>1, :last_ping=>0, :last_read=>0, :last_write=>0, 
+	###      :bytes_read=>319, :bytes_written=>1065}
+	###   ]
 	def conn_status
 		self.request( :status, :what => 'net' )
 	end
 
 
-	### Prints the unix time the server thinks it’s using. Useful for synching.
+	### Returns the server's time as a Time object.
 	def time
 		response = self.request( :time )
-		response.each do |row|
-			row[ :time ] = Time.at( row.delete(:time).to_i ) if row[:time]
-		end
-
-		return response
+		return nil if response.empty?
+		return Time.at( response.first[:time].to_i )
 	end
 
 
@@ -111,6 +151,16 @@ class Mongrel2::Control
 	end
 
 
+	### Close the control port connection.
+	def close
+		self.socket.close
+	end
+
+
+	#########
+	protected
+	#########
+
 	### Send a raw request to the server, asking it to perform the +command+ with the specified
 	### +options+ hash and return the results.
 	def request( command, options={} )
@@ -121,12 +171,6 @@ class Mongrel2::Control
 		response = self.socket.recv
 		self.log.debug "Response: %p" % [ response ]
 		return unpack_response( response )
-	end
-
-
-	### Close the control port connection.
-	def close
-		self.socket.close
 	end
 
 

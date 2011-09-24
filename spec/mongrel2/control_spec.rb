@@ -30,7 +30,7 @@ describe Mongrel2::Control do
 
 	before( :each ) do
 		@ctx = double( "ZMQ::Context" )
-		@socket = double( "ZMQ REQ socket", :connect => nil )
+		@socket = double( "ZMQ REQ socket", :connect => nil, :setsockopt => nil )
 		@ctx.stub( :socket ).with( ZMQ::REQ ).and_return( @socket )
 
 		Mongrel2.instance_variable_set( :@zmq_ctx, @ctx )
@@ -160,7 +160,7 @@ describe Mongrel2::Control do
 		@socket.should_receive( :send ).with( "10:4:time,0:}]" )
 		@socket.should_receive( :recv ).
 			and_return( "49:7:headers,7:4:time,]4:rows,18:14:10:1315532674,]]}" )
-		@control.time.should == [{ :time => Time.at(1315532674) }]
+		@control.time.should == Time.at( 1315532674 )
 	end
 
 	it "sends a 'kill' command with an ID equal to the argument to the control port when #kill " +
