@@ -1,3 +1,13 @@
+== v0.3.0 [2011-09-23] Michael Granger <ged@FaerieMUD.org>
+
+- Mongrel2::Client fixes/documentation updates.
+- Include FileUtils in the 'm2sh.rb load' context so configs 
+  loaded by it can create run/log directories, etc.
+- Mongrel2::Connection: Set SO_LINGER on the sockets so 
+  closing the connection doesn't wait for unconsumed events.
+- Add missing include to Mongrel2::Handler
+
+
 == v0.2.4 [2011-09-21] Michael Granger <ged@FaerieMUD.org>
 
 - Added a cleaned-up Mongrel2::Response#inspect like
