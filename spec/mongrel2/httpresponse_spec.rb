@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+#encoding: utf-8
 
 BEGIN {
 	require 'pathname'
@@ -91,12 +92,18 @@ describe Mongrel2::HTTPResponse do
 		@response.headers.should have(1).keys
 	end
 
-
 	it "can find the length of its body if it's a String" do
 		test_body = 'A string full of stuff'
 		@response.body = test_body
 
 		@response.get_content_length.should == test_body.length
+	end
+
+	it "can find the length of its body if it's a String with multi-byte characters in it" do
+		test_body = 'Хорошая собака, Стрелке! Очень хорошо.'
+		@response.body = test_body
+
+		@response.get_content_length.should == test_body.bytesize
 	end
 
 	it "can find the length of its body if it's a seekable IO" do

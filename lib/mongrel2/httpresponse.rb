@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+#encoding: utf-8
 
 require 'time'
 
@@ -153,8 +154,8 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	### one, or using #seek and #tell if it implements those. If neither of those are
 	### possible, an exception is raised.
 	def get_content_length
-		if @body.respond_to?( :length )
-			return @body.length
+		if @body.respond_to?( :bytesize )
+			return @body.bytesize
 		elsif @body.respond_to?( :seek ) && @body.respond_to?( :tell )
 			starting_pos = @body.tell
 			@body.seek( 0, IO::SEEK_END )
