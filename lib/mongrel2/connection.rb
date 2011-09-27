@@ -168,6 +168,15 @@ class Mongrel2::Connection
 	end
 
 
+	### Return a string describing the connection.
+	def to_s
+		return "{%s} %s <-> %s" % [
+			self.app_id,
+			self.sub_addr,
+			self.pub_addr,
+		]
+	end
+
 	### Returns a string containing a human-readable representation of the Connection,
 	### suitable for debugging.
 	def inspect
@@ -181,12 +190,10 @@ class Mongrel2::Connection
 			"not connected"
 		end
 
-		return "#<%p:0x%016x {%s} %s <-> %s (%s)>" % [
+		return "#<%p:0x%016x %s (%s)>" % [
 			self.class,
 			self.object_id * 2,
-			self.app_id,
-			self.sub_addr,
-			self.pub_addr,
+			self.to_s,
 			state,
 		]
 	end

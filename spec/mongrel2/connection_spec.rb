@@ -68,6 +68,10 @@ describe Mongrel2::Connection do
 		@conn.response_sock.should == response_sock
 	end
 
+	it "stringifies as a description of the appid and both sockets" do
+		@conn.to_s.should == "{#{TEST_UUID}} #{TEST_SEND_SPEC} <-> #{TEST_RECV_SPEC}"
+	end
+
 	context "after a connection has been established" do
 
 		before( :each ) do
