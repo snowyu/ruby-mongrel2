@@ -254,7 +254,7 @@ class Mongrel2::Handler
 	### Handle a disconnect notice from Mongrel2 via the given +request+. Its return value
 	### is ignored.
 	def handle_disconnect( request )
-		self.log.warn "Unhandled disconnect notice."
+		self.log.info "Unhandled disconnect notice."
 		return nil
 	end
 
