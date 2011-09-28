@@ -1,3 +1,9 @@
+== v0.4.0 [2011-09-27] Michael Granger <ged@FaerieMUD.org>
+
+Additions:
+- Added Mongrel2::Config::Server.by_uuid( uuid )
+
+
 == v0.3.1 [2011-09-27] Michael Granger <ged@FaerieMUD.org>
 
 Bugfix:
