@@ -22,6 +22,13 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 
 	one_to_many :hosts
 
+	##
+	# Look up a server by its +uuid+.
+	# :singleton-method: by_uuid
+	# :call-seq:
+	#    by_uuid( uuid )
+	def_dataset_method( :by_uuid ) {|uuid| filter(:uuid => uuid).first }
+
 
 	#
 	# :section: Validation Callbacks
