@@ -93,7 +93,7 @@ module Mongrel2
 		# :section: HTTP verb methods
 		#
 
-		### Create a new Mongrel2::Request for the specified +uri+.
+		### Create a new GET Mongrel2::Request for the specified +uri+ and +headers+.
 		def get( uri, headers={} )
 			raise "Request doesn't route through %p" % [ self.route ] unless
 				uri.start_with?( self.route )
@@ -102,6 +102,34 @@ module Mongrel2
 			rclass = Mongrel2::Request.subclass_for_method( :GET )
 
 			return rclass.new( self.sender_id, self.conn_id.to_s, uri.to_s, headers )
+		end
+
+
+		### Create a new HEAD Mongrel2::Request for the specified +uri+ and +headers+.
+		def head( uri, headers={} )
+			raise "Request doesn't route through %p" % [ self.route ] unless
+				uri.start_with?( self.route )
+
+			headers = self.make_merged_headers( :HEAD, uri, headers )
+			rclass = Mongrel2::Request.subclass_for_method( :HEAD )
+
+			return rclass.new( self.sender_id, self.conn_id.to_s, uri.to_s, headers )
+		end
+
+
+		### Create a new POST Mongrel2::Request for the specified +uri+ with
+		### the given +body+ and +headers+.
+		def post( uri, body='', headers={} )
+			raise "Request doesn't route through %p" % [ self.route ] unless
+				uri.start_with?( self.route )
+
+			headers = self.make_merged_headers( :POST, uri, headers )
+			rclass = Mongrel2::Request.subclass_for_method( :POST )
+
+			req = rclass.new( self.sender_id, self.conn_id.to_s, uri.to_s, headers )
+			req.body = body
+
+			return req
 		end
 
 
