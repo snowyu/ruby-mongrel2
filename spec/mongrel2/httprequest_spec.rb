@@ -27,11 +27,11 @@ describe Mongrel2::HTTPRequest do
 
 	before( :all ) do
 		setup_logging( :fatal )
+		@factory = Mongrel2::RequestFactory.new( route: '/glamour' )
 	end
 
 	before( :each ) do
-		headers = normalize_headers( {} )
-		@req = Mongrel2::HTTPRequest.new( TEST_UUID, 8817, '/test', headers, '' )
+		@req = @factory.get( '/glamour/test' )
 	end
 
 	after( :all ) do
@@ -76,6 +76,31 @@ describe Mongrel2::HTTPRequest do
 		@req.headers.version = 'HTTP/1.1'
 		@req.headers.connection = 'keep-alive'
 		@req.should be_keepalive()
+	end
+
+	it "allows the request body to be rewritten" do
+		@req.body = 'something else'
+		@req.body.should == 'something else'
+	end
+
+
+	describe "header convenience methods" do
+
+		before( :each ) do
+			@req.headers.merge!(
+				'Content-type' => 'application/x-pdf',
+				'Content-encoding' => 'gzip'
+			)
+		end
+
+		it "provides a convenience method for fetching the 'Content-type' header" do
+			@req.content_type.should == 'application/x-pdf'
+		end
+
+		it "provides a convenience method for fetching the 'Content-encoding' header" do
+			@req.content_encoding.should == 'gzip'
+		end
+
 	end
 
 end

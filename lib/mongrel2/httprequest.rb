@@ -16,6 +16,10 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 	register_request_type( self, *HANDLED_HTTP_METHODS )
 
 
+	# Allow the entity body of the request to be modified
+	attr_writer :body
+
+
 	### Override the type of response returned by this request type.
 	def self::response_class
 		return Mongrel2::HTTPResponse
@@ -44,6 +48,19 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 			return true
 		end
 	end
+
+
+	### Fetch the mimetype of the request's content, as set in its header.
+	def content_type
+		return self.headers.content_type
+	end
+
+
+	### Fetch the encoding type of the request's content, as set in its header.
+	def content_encoding
+		return self.headers.content_encoding
+	end
+
 
 
 	#########
