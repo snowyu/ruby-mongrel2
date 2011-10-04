@@ -1,4 +1,4 @@
-## v0.6.0 [2011-10-03] Michael Granger <ged@FaerieMUD.org>
+== v0.6.0 [2011-10-03] Michael Granger <ged@FaerieMUD.org>
 
 Mongrel2::HTTPRequest enhancements.
 - Added #body= for rewriting the entity body
