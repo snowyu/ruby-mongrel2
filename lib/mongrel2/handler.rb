@@ -159,15 +159,15 @@ class Mongrel2::Handler
 	def start_accepting_requests
 		until @conn.closed?
 			req = @conn.receive
-			self.log.info "%p via %s:%d" % [ req.class, req.sender_id, req.conn_id ]
+			self.log.info( req.inspect )
 
 			res = self.dispatch_request( req )
 
 			if res
-				self.log.debug "  responding with a %p" % [ res.class ]
+				self.log.info( res.inspect )
 				@conn.reply( res ) unless @conn.closed?
 			else
-				self.log.debug "  no response; ignoring."
+				self.log.info "  no response; ignoring."
 			end
 		end
 	rescue ZMQ::Error => err
