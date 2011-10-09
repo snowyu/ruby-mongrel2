@@ -1,3 +1,11 @@
+== v0.7.0 [2011-10-09] Michael Granger <ged@FaerieMUD.org>
+
+- Add an optional #request attribute to Mongrel2::Response and make
+  Response.from_request set it. This is to make things like content-
+  negotiation less of a pain in the ass.
+- Log request and response both at INFO.
+
+
 == v0.6.0 [2011-10-03] Michael Granger <ged@FaerieMUD.org>
 
 Mongrel2::HTTPRequest enhancements.
