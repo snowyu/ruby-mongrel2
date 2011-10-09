@@ -42,6 +42,7 @@ describe Mongrel2::Response do
 		response.should be_a( Mongrel2::Response )
 		response.sender_id.should == req.sender_id
 		response.conn_id.should == req.conn_id
+		response.request.should equal( req )
 	end
 
 

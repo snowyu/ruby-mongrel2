@@ -19,7 +19,10 @@ class Mongrel2::Response
 	### Create a response to the specified +request+ and return it.
 	def self::from_request( request )
 		Mongrel2.log.debug "Creating a %p to request %p" % [ self, request ]
-		return new( request.sender_id, request.conn_id )
+		response = new( request.sender_id, request.conn_id )
+		response.request = request
+
+		return response
 	end
 
 
@@ -28,6 +31,7 @@ class Mongrel2::Response
 		@sender_id = sender_id
 		@conn_id   = conn_id
 		@body      = body
+		@request   = nil
 	end
 
 
@@ -45,6 +49,9 @@ class Mongrel2::Response
 
 	# The body of the response
 	attr_accessor :body
+
+	# The request that this response is for, if there is one
+	attr_accessor :request
 
 
 	### Append the given +object+ to the response body. Returns the response for
