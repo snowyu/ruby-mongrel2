@@ -16,14 +16,18 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 	register_request_type( self, *HANDLED_HTTP_METHODS )
 
 
-	# Allow the entity body of the request to be modified
-	attr_writer :body
-
-
 	### Override the type of response returned by this request type.
 	def self::response_class
 		return Mongrel2::HTTPResponse
 	end
+
+
+	#################################################################
+	###	I N S T A N C E   M E T H O D S
+	#################################################################
+
+	# Allow the entity body of the request to be modified
+	attr_writer :body
 
 
 	### Return +true+ if the request is an HTTP/1.1 request and its
