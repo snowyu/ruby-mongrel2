@@ -1,3 +1,9 @@
+== v0.9.1 [2011-10-12] Michael Granger <ged@FaerieMUD.org>
+
+Bugfix: use a dup of the default content-type constant instead 
+of the String itself.
+
+
 == v0.9.0 [2011-10-12] Michael Granger <ged@FaerieMUD.org>
 
 - Fix Mongrel2::Table not duping/cloning its internal values.
