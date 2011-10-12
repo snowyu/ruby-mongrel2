@@ -139,14 +139,22 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	end
 
 
-	### Return the current response header as a valid HTTP string.
+	### Return the current response header as a valid HTTP string after
+	### normalizing them.
 	def header_data
+		return self.normalized_headers.to_s
+	end
+
+
+	### Get a copy of the response headers table with any auto-generated or
+	### calulated headers set.
+	def normalized_headers
 		headers = self.headers.dup
 
 		headers[:date] ||= Time.now.httpdate
 		headers[:content_length] ||= self.get_content_length
 
-		return headers.to_s
+		return headers
 	end
 
 

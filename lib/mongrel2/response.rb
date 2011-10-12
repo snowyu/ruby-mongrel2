@@ -49,8 +49,8 @@ class Mongrel2::Response
 
 	# The body of the response
 	attr_accessor :body
-
 	# The request that this response is for, if there is one
+
 	attr_accessor :request
 
 
