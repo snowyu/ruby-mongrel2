@@ -153,7 +153,7 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 
 		headers[:date] ||= Time.now.httpdate
 		headers[:content_length] ||= self.get_content_length
-		headers[:content_type] ||= DEFAULT_CONTENT_TYPE.clone
+		headers[:content_type] ||= DEFAULT_CONTENT_TYPE.dup
 
 		return headers
 	end
