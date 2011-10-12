@@ -1,3 +1,8 @@
+== v0.9.2 [2011-10-12] Michael Granger <ged@FaerieMUD.org>
+
+Bugfix: dup instead of clone to get rid of frozen status.
+
+
 == v0.9.1 [2011-10-12] Michael Granger <ged@FaerieMUD.org>
 
 Bugfix: use a dup of the default content-type constant instead 
