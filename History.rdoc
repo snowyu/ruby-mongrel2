@@ -1,3 +1,9 @@
+== v0.8.0 [2011-10-12] Michael Granger <ged@FaerieMUD.org>
+
+- Split out the normalization of HTTP response headers into two
+  methods for overriding.
+
+
 == v0.7.0 [2011-10-09] Michael Granger <ged@FaerieMUD.org>
 
 - Add an optional #request attribute to Mongrel2::Response and make
