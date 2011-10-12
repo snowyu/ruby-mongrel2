@@ -31,7 +31,7 @@ describe Mongrel2::HTTPResponse do
 	end
 
 	before( :each ) do
-		@response = Mongrel2::HTTPResponse.new( TEST_UUID, 299, :content_type => 'text/html' )
+		@response = Mongrel2::HTTPResponse.new( TEST_UUID, 299 )
 	end
 
 	after( :all ) do
@@ -44,16 +44,18 @@ describe Mongrel2::HTTPResponse do
 	end
 
 	it "allows headers to be set when the response is created" do
-		@response.headers.content_type.should == 'text/html'
+		response = Mongrel2::HTTPResponse.new( TEST_UUID, 299, :content_type => 'image/jpeg' )
+		response.headers.content_type.should == 'image/jpeg'
 	end
 
 	it "is a No Content response if not set otherwise" do
 		@response.status_line.should == 'HTTP/1.1 204 No Content'
 	end
 
-	it "sets Date and Content-length headers automatically if they haven't been set" do
+	it "sets Date, Content-type, and Content-length headers automatically if they haven't been set" do
 		@response << "Some stuff."
 
+		@response.header_data.should =~ %r{Content-type: #{Mongrel2::HTTPResponse::DEFAULT_CONTENT_TYPE}}i
 		@response.header_data.should =~ /Content-length: 11/i
 		@response.header_data.should =~ /Date: #{HTTP_DATE}/i
 	end
@@ -66,10 +68,6 @@ describe Mongrel2::HTTPResponse do
 
 	it "doesn't have a body" do
 		@response.body.should be_empty()
-	end
-
-	it "knows it hasn't been handled" do
-		@response.should_not be_handled()
 	end
 
 	it "stringifies to a valid RFC2616 response string" do
@@ -128,14 +126,15 @@ describe Mongrel2::HTTPResponse do
 		@response.get_content_length.should == length - 100
 	end
 
-	it "knows that it has been handled even if the status is set to NOT_FOUND" do
-		@response.status = HTTP::NOT_FOUND
+	it "knows whether or not it has been handled" do
+		@response.should_not be_handled()
+		@response.status = HTTP::OK
 		@response.should be_handled()
 	end
 
-	it "knows if it has not yet been handled" do
-		@response.should_not be_handled()
-		@response.status = HTTP::OK
+	it "knows that it has been handled even if the status is set to NOT_FOUND" do
+		@response.reset
+		@response.status = HTTP::NOT_FOUND
 		@response.should be_handled()
 	end
 
@@ -185,25 +184,14 @@ describe Mongrel2::HTTPResponse do
 
 
 	it "knows what the response content type is" do
-		headers = mock( 'headers' )
-		@response.stub!( :headers ).and_return( headers )
-
-		headers.should_receive( :[] ).
-			with( :content_type ).
-			and_return( 'text/erotica' )
-
+		@response.headers['Content-Type'] = 'text/erotica'
 		@response.content_type.should == 'text/erotica'
 	end
 
 
 	it "can modify the response content type" do
-		headers = mock( 'headers' )
-		@response.stub!( :headers ).and_return( headers )
-
-		headers.should_receive( :[]= ).
-			with( :content_type, 'image/nude' )
-
 		@response.content_type = 'image/nude'
+		@response.headers['Content-Type'].should == 'image/nude'
 	end
 
 
