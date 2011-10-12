@@ -133,11 +133,17 @@ describe Mongrel2::Table do
 
 
 	it "dupes its inner hash when duped" do
-		newtable = @table.dup
+		@table['foom'] = 'a string'
+		@table['frong'] = %w[eenie meenie mynie moe]
 
+		newtable = @table.dup
 		newtable['idkfa'] = 'god'
+		newtable[:foom] << " and another string"
+		newtable[:frong][3].replace( "mississipi" )
+
 		@table.should_not include( 'idkfa' )
-		@table.should be_empty()
+		@table[:foom].should == 'a string'
+		@table[:frong][3].should == 'moe'
 	end
 
 

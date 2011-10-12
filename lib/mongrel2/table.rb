@@ -50,8 +50,28 @@ class Mongrel2::Table
 
 
 	### Make sure the inner Hash is unique on duplications.
-	def initialize_copy( orig_table ) # :nodoc:
-		@hash = orig_table.to_hash
+	def initialize_dup( * ) # :nodoc:
+		@hash = @hash.dup
+		@hash.each do |k, v|
+			if v.is_a?( Array )
+				@hash[ k ] = v.map( &:dup )
+			else
+				@hash[ k ] = v.dup
+			end
+		end
+	end
+
+
+	### Make sure the inner Hash is unique on clones.
+	def initialize_clone( * ) # :nodoc:
+		@hash = @hash.clone
+		@hash.each do |k, v|
+			if v.is_a?( Array )
+				@hash[ k ] = v.map( &:clone )
+			else
+				@hash[ k ] = v.clone
+			end
+		end
 	end
 
 
