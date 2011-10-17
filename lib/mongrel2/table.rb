@@ -41,6 +41,10 @@ class Mongrel2::Table
 	end
 
 
+	#################################################################
+	###	I N S T A N C E   M E T H O D S
+	#################################################################
+
 	### Create a new Mongrel2::Table using the given +hash+ for initial
 	### values.
 	def initialize( initial_values={} )

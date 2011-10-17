@@ -49,8 +49,8 @@ class Mongrel2::Response
 
 	# The body of the response
 	attr_accessor :body
-	# The request that this response is for, if there is one
 
+	# The request that this response is for, if there is one
 	attr_accessor :request
 
 
@@ -74,6 +74,7 @@ class Mongrel2::Response
 	def to_s
 		return self.body
 	end
+
 
 	### Returns a string containing a human-readable representation of the Response,
 	### suitable for debugging.

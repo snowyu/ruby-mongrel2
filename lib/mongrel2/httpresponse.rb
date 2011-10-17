@@ -163,19 +163,19 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	### one, or using #seek and #tell if it implements those. If neither of those are
 	### possible, an exception is raised.
 	def get_content_length
-		if @body.respond_to?( :bytesize )
-			return @body.bytesize
-		elsif @body.respond_to?( :seek ) && @body.respond_to?( :tell )
-			starting_pos = @body.tell
-			@body.seek( 0, IO::SEEK_END )
-			length = @body.tell - starting_pos
-			@body.seek( starting_pos, IO::SEEK_SET )
+		if self.body.respond_to?( :bytesize )
+			return self.body.bytesize
+		elsif self.body.respond_to?( :seek ) && self.body.respond_to?( :tell )
+			starting_pos = self.body.tell
+			self.body.seek( 0, IO::SEEK_END )
+			length = self.body.tell - starting_pos
+			self.body.seek( starting_pos, IO::SEEK_SET )
 
 			return length
 		else
 			raise Mongrel2::ResponseError,
 				"No way to calculate the content length of the response (a %s)." %
-				[ @body.class.name ]
+				[ self.body.class.name ]
 		end
 	end
 
