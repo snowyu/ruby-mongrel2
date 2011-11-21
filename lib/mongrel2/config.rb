@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'yajl'
+require 'yaml'
 require 'pathname'
 require 'uri'
 
@@ -45,6 +47,7 @@ module Mongrel2
 
 		plugin :validation_helpers
 		plugin :subclasses
+		plugin :json_serializer
 
 		# Configuration defaults
 		DEFAULTS = {
