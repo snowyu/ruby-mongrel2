@@ -28,11 +28,11 @@ server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
 
     access_log   "/logs/access.log"
     error_log    "/logs/error.log"
-    chroot       "./"
+    chroot       "/var/mongrel2"
     pid_file     "/run/mongrel2.pid"
     default_host "localhost"
     name         "main"
-    port         8113
+    port         80
 
 	# your main host 
 	host "localhost" do
