@@ -26,14 +26,14 @@ hoespec = Hoe.spec 'mongrel2' do
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
 	self.dependency 'nokogiri',   '~> 1.5'
-	self.dependency 'sequel',     '~> 3.26'
+	self.dependency 'sequel',     '~> 3.31'
 	self.dependency 'amalgalite', '~> 1.1'
 	self.dependency 'tnetstring', '~> 0.3'
-	self.dependency 'yajl-ruby',  '~> 0.8'
+	self.dependency 'yajl-ruby',  '~> 1.0'
 	self.dependency 'zmq',        '~> 2.1.4'
 
 	self.dependency 'configurability', '~> 1.0', :developer
-	self.dependency 'rspec',           '~> 2.4', :developer
+	self.dependency 'rspec',           '~> 2.8', :developer
 
 	self.spec_extras[:licenses] = ["BSD"]
 	self.require_ruby_version( '>= 1.9.2' )
@@ -47,11 +47,12 @@ end
 ENV['VERSION'] ||= hoespec.spec.version.to_s
 
 # Ensure the specs pass before checking in
-task 'hg:precheckin' => [ :check_manifest, :check_history, :spec ]
-
+task 'hg:precheckin' => [:check_manifest, :check_history, :spec]
 
 # Rebuild the ChangeLog immediately before release
 task :prerelease => [:check_manifest, :check_history, 'ChangeLog']
+
+task :check_manifest => 'ChangeLog'
 
 
 desc "Build a coverage report"
