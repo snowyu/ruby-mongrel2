@@ -1,3 +1,9 @@
+== v0.9.3 [2012-01-09] Michael Granger <ged@FaerieMUD.org>
+
+- Enable the json_serializer plugin for the config ORM classes
+- Backing out the change to HTTPResponse to use the @body ivar: changed the negotiation
+
+
 == v0.9.2 [2011-10-12] Michael Granger <ged@FaerieMUD.org>
 
 Bugfix: dup instead of clone to get rid of frozen status.
