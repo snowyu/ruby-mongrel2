@@ -49,11 +49,11 @@ class Mongrel2::M2SHCommand
 
 	# Make a HighLine color scheme
 	COLOR_SCHEME = HighLine::ColorScheme.new do |scheme|
-		scheme[:header]	   = [ :bold, :yellow ]
+		scheme[:header]    = [ :bold, :yellow ]
 		scheme[:subheader] = [ :bold, :white ]
-		scheme[:key]	   = [ :white ]
-		scheme[:value]	   = [ :bold, :white ]
-		scheme[:error]	   = [ :red ]
+		scheme[:key]       = [ :white ]
+		scheme[:value]     = [ :bold, :white ]
+		scheme[:error]     = [ :red ]
 		scheme[:warning]   = [ :yellow ]
 		scheme[:message]   = [ :reset ]
 	end
@@ -180,6 +180,7 @@ class Mongrel2::M2SHCommand
 				text 'Global Options'
 				opt :config, "Specify the configfile to use.",
 					:default => DEFAULT_CONFIG_URI
+				opt :sudo, "Use 'sudo' to run the mongrel2 server."
 				text ''
 
 				text 'Other Options:'
@@ -518,6 +519,8 @@ class Mongrel2::M2SHCommand
 		# Run the command, waiting for it to finish if invoked from shell mode, or
 		# execing it if not.
 		cmd = [ 'mongrel2', Mongrel2::Config.pathname.to_s, server.uuid ]
+		cmd.unshift( 'sudo' ) if self.options.sudo
+
 		if @shellmode
 			system( *cmd )
 		else
