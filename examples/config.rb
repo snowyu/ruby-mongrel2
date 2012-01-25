@@ -32,7 +32,7 @@ server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
     pid_file     "/run/mongrel2.pid"
     default_host "localhost"
     name         "main"
-    port         80
+    port         8113
 
 	# your main host 
 	host "localhost" do
