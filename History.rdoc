@@ -1,5 +1,14 @@
-== v0.9.3 [2012-01-09] Michael Granger <ged@FaerieMUD.org>
+== v0.10.0 [2012-01-25] Michael Granger <ged@FaerieMUD.org>
 
+- New methods:
+  * Mongrel2::Config.settings
+  * Mongrel2::Server
+    - #control_socket_uri
+	- #control_socket
+	- #pid_file_path
+- Added a new Mongrel2::Constants::DEFAULT_CONTROL_SOCKET constant
+- Finished implementation of the rest of the m2sh commands in the ruby analog
+- Adding a "sudo" option to m2sh.rb to start the server as root
 - Enable the json_serializer plugin for the config ORM classes
 - Backing out the change to HTTPResponse to use the @body ivar: changed the negotiation
 
