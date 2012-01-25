@@ -67,6 +67,15 @@ describe Mongrel2::Config do
 		Mongrel2::Config.servers.first.uuid.should == TEST_UUID
 	end
 
+	it "has a convenience method for getting a setting's value" do
+		Mongrel2::Config.init_database
+		Mongrel2::Config::Setting.dataset.truncate
+		Mongrel2::Config::Setting.create( key: 'control_port', value: 'ipc://var/run/control.sock' )
+		Mongrel2::Config.settings.should be_a( Hash )
+		Mongrel2::Config.settings.should have( 1 ).member
+		Mongrel2::Config.settings[ :control_port ].should == 'ipc://var/run/control.sock'
+	end
+
 	it "can read the configuration schema from a data file" do
 		Mongrel2::Config.load_config_schema.should =~ /create table server/i
 	end

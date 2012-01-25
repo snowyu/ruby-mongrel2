@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'pp'
+require 'uri'
+require 'pathname'
 require 'shellwords'
 require 'fileutils'
 require 'tnetstring'
@@ -29,18 +30,20 @@ require 'mongrel2/config'
 #   [√]  commit  Adds a message to the log.
 #   [√]     log  Prints the commit log.
 #   [√]   start  Starts a server.
-#   [ ]    stop  Stops a server.
-#   [ ]  reload  Reloads a server.
-#   [ ] running  Tells you what's running.
-#   [ ] control  Connects to the control port.
+#   [√]    stop  Stops a server.
+#   [√]  reload  Reloads a server.
+#   [√] running  Tells you what's running.
+#   [-] control  Connects to the control port.
 #   [√] version  Prints the Mongrel2 and m2sh version.
 #   [√]    help  Get help, lists commands.
 #   [-]    uuid  Prints out a randomly generated UUID.
 #
 # I just use 'uuidgen' to generate uuids (which is all m2sh does, as
-# well), so I don't plan to implement that. Everything else should
-# be pretty easy.
-# 
+# well), so I don't plan to implement that. The 'control' command is more-easily
+# accessed via pry+Mongrel2::Control, so I'm not going to implement that, either.
+# Everything else should be analagous to (or better than) the m2sh that comes with
+# mongrel2.
+#
 class Mongrel2::M2SHCommand
 	extend ::Sysexits
 	include Sysexits,
@@ -101,7 +104,7 @@ class Mongrel2::M2SHCommand
 	def self::prompt
 		unless @prompt
 			@prompt = HighLine.new
-			@prompt.wrap_at = @prompt.output_cols - 10
+			# @prompt.wrap_at = @prompt.output_cols - 3
 		end
 
 		return @prompt
@@ -492,33 +495,12 @@ class Mongrel2::M2SHCommand
 
 	### The 'start' command
 	def start_command( *args )
-		serverspec = args.shift
-		servers = Mongrel2::Config.servers
-
-		raise "No servers are configured." if servers.empty?
-		server = nil
-
-		# If there's only one configured server, just make sure if a serverspec was given
-		# that it would have matched.
-		if servers.length == 1
-			server = servers.first if !serverspec ||
-				servers.first.values_at( :uuid, :default_host, :name ).include?( serverspec )
-
-		# Otherwise, require an argument and search for the desired server if there is one
-		else
-			raise "You must specify a server uuid/hostname/name when more " +
-			      "than one server is configured." if servers.length > 1 && !serverspec
-
-			server = servers.find {|s| s.uuid == serverspec } ||
-			         servers.find {|s| s.default_host == serverspec } ||
-			         servers.find {|s| s.name == serverspec }
-		end
-
-		raise "No servers match '#{serverspec}'" unless server
+		server = find_server( args.shift )
+		mongrel2 = ENV['MONGREL2'] || 'mongrel2'
 
 		# Run the command, waiting for it to finish if invoked from shell mode, or
 		# execing it if not.
-		cmd = [ 'mongrel2', Mongrel2::Config.pathname.to_s, server.uuid ]
+		cmd = [ mongrel2, Mongrel2::Config.pathname.to_s, server.uuid ]
 		cmd.unshift( 'sudo' ) if self.options.sudo
 
 		if @shellmode
@@ -532,10 +514,63 @@ class Mongrel2::M2SHCommand
 	[SERVER]
 	If not specified, SERVER is assumed to be the only server entry in the
 	current config. If there are more than one, you must specify a SERVER.
-	
+
 	The SERVER can be a uuid, hostname, or server name, and are searched for
 	in that order.
 	END_USAGE
+
+
+	### The 'reload' command
+	def reload_command( *args )
+		server = find_server( args.shift )
+		control = server.control_socket
+
+		header "Reloading '%s'" % [ server.name ]
+		control.reload
+		message "done."
+	end
+	help :reload, "Reload the specified server's configuration"
+	usage :reload, "[server]"
+
+
+	### The 'stop' command
+	def stop_command( *args )
+		server = find_server( args.shift )
+		control = server.control_socket
+
+		header "Stopping '%s' gracefully." % [ server.name ]
+		control.stop
+		message "done."
+	end
+	help :stop, "Stop the specified server gracefully"
+	usage :stop, "[server]"
+
+
+	### The 'running' command
+	def running_command( *args )
+		server = find_server( args.shift )
+		pidfile = server.pid_file_path
+
+		header "Checking the status of the '%s' server." % [ server.name ]
+		unless pidfile.exist?
+			message "Not running: PID file (%s) doesn't exist." % [ pidfile ]
+			exit :noinput
+		end
+
+		pid = Integer( pidfile.read )
+		begin
+			Process.kill( 0, pid )
+		rescue Errno::ESRCH
+			message "  mongrel2 at PID %d is NOT running" % [ pid ]
+			exit :unavailable
+		rescue => err
+			error "  %p while signalling PID %d: %s" % [ err.class, pid, err.message ]
+		end
+
+		message "  mongrel2 at PID %d is running." % [ pid ]
+	end
+	help :running, "Show the status of a server."
+	usage :running, "[server]"
 
 
 	### The 'version' command
@@ -596,6 +631,35 @@ class Mongrel2::M2SHCommand
 		end
 	end
 
+
+	### Search the current mongrel2 config for a server matching +serverspec+ and
+	### return it as a Mongrel2::Config::Server object.
+	def find_server( serverspec=nil )
+		server = nil
+		servers = Mongrel2::Config.servers
+
+		raise "No servers are configured." if servers.empty?
+
+		# If there's only one configured server, just make sure if a serverspec was given
+		# that it would have matched.
+		if servers.length == 1
+			server = servers.first if !serverspec ||
+				servers.first.values_at( :uuid, :default_host, :name ).include?( serverspec )
+
+		# Otherwise, require an argument and search for the desired server if there is one
+		else
+			raise "You must specify a server uuid/hostname/name when more " +
+			      "than one server is configured." if servers.length > 1 && !serverspec
+
+			server = servers.find {|s| s.uuid == serverspec } ||
+			         servers.find {|s| s.default_host == serverspec } ||
+			         servers.find {|s| s.name == serverspec }
+		end
+
+		raise "No servers match '#{serverspec}'" unless server
+
+		return server
+	end
 
 end # class Mongrel2::M2SHCommand
 

@@ -32,6 +32,7 @@ describe Mongrel2::Config::Server do
 	before( :each ) do
 		@server = Mongrel2::Config::Server.new(
 			uuid:         TEST_UUID,
+			chroot:       '/usr/local/www',
 			access_log:   '/logs/access.log',
 			error_log:    '/logs/error.log',
 			pid_file:     '/run/mongrel2.pid',
@@ -79,6 +80,30 @@ describe Mongrel2::Config::Server do
 		@server.errors.full_messages.first.should =~ /missing or nil/i
 	end
 
+
+	it "knows where its control socket is if there's no setting for control_port" do
+		Mongrel2::Config::Setting.dataset.truncate
+		@server.control_socket_uri.should == 'ipc://usr/local/www/run/control'
+	end
+
+	it "knows where its control socket is if there is a setting for control_port" do
+		Mongrel2::Config::Setting.dataset.truncate
+		Mongrel2::Config::Setting.create( key: 'control_port', value: 'ipc://var/run/control.sock' )
+		@server.control_socket_uri.should == 'ipc://usr/local/www/var/run/control.sock'
+	end
+
+	it "can create a Mongrel2::Control for its control port" do
+		Mongrel2::Config::Setting.dataset.truncate
+		sock = @server.control_socket
+		sock.should be_a( Mongrel2::Control )
+		sock.close
+	end
+
+	it "knows what the Pathname of its PID file is" do
+		pidfile = @server.pid_file_path
+		pidfile.should be_a( Pathname )
+		pidfile.to_s.should == '/usr/local/www/run/mongrel2.pid'
+	end
 
 end
 

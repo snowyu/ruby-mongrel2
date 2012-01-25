@@ -127,6 +127,18 @@ module Mongrel2
 		end
 
 
+		### Return a Hash of current settings from the config database. The keys are converted to
+		### Symbols.
+		def self::settings
+			setting_hash = Mongrel2::Config::Setting.to_hash( :key, :value )
+			setting_hash.keys.each do |k|
+				setting_hash[ k.to_sym ] = setting_hash.delete( k )
+			end
+
+			return setting_hash
+		end
+		
+
 		### Return the contents of the configuration schema SQL file.
 		def self::load_config_schema
 			return CONFIG_SQL.read

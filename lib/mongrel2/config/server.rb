@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'uri'
+require 'pathname'
+
 require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/config' unless defined?( Mongrel2::Config )
 
@@ -30,6 +33,40 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 	def_dataset_method( :by_uuid ) {|uuid| filter(:uuid => uuid).first }
 
 
+	### Return the URI for its control socket.
+	def control_socket_uri
+		# Find the control socket relative to the server's chroot
+		csock_uri = Mongrel2::Config.settings[:control_port] || DEFAULT_CONTROL_SOCKET
+		Mongrel2.log.debug "Chrooted control socket uri is: %p" % [ csock_uri ]
+
+		scheme, sock_path = csock_uri.split( '://', 2 )
+		Mongrel2.log.debug "  chrooted socket path is: %p" % [ sock_path ]
+		
+		csock_path = Pathname( self.chroot ) + sock_path
+		Mongrel2.log.debug "  fully-qualified path is: %p" % [ csock_path ]
+		csock_uri = "%s:/%s" % [ scheme, csock_path ]
+
+		Mongrel2.log.debug "  control socket URI is: %p" % [ csock_uri ]
+		return csock_uri
+	end
+
+
+	### Return the Mongrel2::Control object for the server's control socket.
+	def control_socket
+		return Mongrel2::Control.new( self.control_socket_uri )
+	end
+	
+	
+	### Return a Pathname for the server's PID file with its chroot directory prepended.
+	def pid_file_path
+		base = Pathname( self.chroot )
+		pidfile = self.pid_file
+		pidfile.slice!( 0, 1 ) if pidfile.start_with?( '/' )
+
+		return base + pidfile
+	end
+	
+
 	#
 	# :section: Validation Callbacks
 	#
@@ -39,7 +76,6 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 		self.validates_presence [ :access_log, :error_log, :pid_file, :default_host, :port ],
 			message: 'is missing or nil'
 	end
-
 
 
 	### DSL methods for the Server context besides those automatically-generated from its
