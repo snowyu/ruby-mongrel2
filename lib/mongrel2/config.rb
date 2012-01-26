@@ -4,6 +4,7 @@ require 'yajl'
 require 'yaml'
 require 'pathname'
 require 'uri'
+require 'tnetstring'
 
 require 'sequel'
 
@@ -48,6 +49,8 @@ module Mongrel2
 		plugin :validation_helpers
 		plugin :subclasses
 		plugin :json_serializer
+		plugin :serialization
+
 
 		# Configuration defaults
 		DEFAULTS = {
@@ -74,6 +77,12 @@ module Mongrel2
 			extend Configurability
 			config_key :mongrel2
 		end
+
+
+		# Register custom serializer/deserializer type
+		Sequel::Plugins::Serialization.register_format( :tnetstring,
+			TNetstring.method( :dump ),
+			lambda {|raw| TNetstring.parse( raw ).first} )
 
 
 		### Return a bound Method object to the Sequel constructor of choice for the
@@ -197,7 +206,7 @@ module Mongrel2
 	def self::Config( source )
 		unless Sequel::Model::ANONYMOUS_MODEL_CLASSES.key?( source )
 			anonclass = nil
-		 	if source.is_a?( Sequel::Database )
+			if source.is_a?( Sequel::Database )
 				anonclass = Class.new( Mongrel2::Config )
 				anonclass.db = source
 			else
@@ -211,6 +220,7 @@ module Mongrel2
 	end
 
 	require 'mongrel2/config/directory'
+	require 'mongrel2/config/filter'
 	require 'mongrel2/config/handler'
 	require 'mongrel2/config/host'
 	require 'mongrel2/config/proxy'

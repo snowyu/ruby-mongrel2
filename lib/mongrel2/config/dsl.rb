@@ -9,7 +9,7 @@ require 'mongrel2/config' unless defined?( Mongrel2::Config )
 #
 # This is the mongrel2.org config re-expressed in the Ruby DSL:
 #
-#	# the server to run them all 
+#	# the server to run them all
 #	server '2f62bd5-9e59-49cd-993c-3b6013c28f05' do
 #
 #	    access_log   "/logs/access.log"
@@ -20,29 +20,29 @@ require 'mongrel2/config' unless defined?( Mongrel2::Config )
 #	    name         "main"
 #	    port         6767
 #
-#	    # your main host 
+#	    # your main host
 #	    host "mongrel2.org" do
 #
-#	        # a sample of doing some handlers 
+#	        # a sample of doing some handlers
 #	        route '@chat', handler(
-#	            'tcp://127.0.0.1:9999', 
-#	            '54c6755b-9628-40a4-9a2d-cc82a816345e', 
+#	            'tcp://127.0.0.1:9999',
+#	            '54c6755b-9628-40a4-9a2d-cc82a816345e',
 #	            'tcp://127.0.0.1:9998'
-#	        ) 
+#	        )
 #
 #	        route '/handlertest', handler(
-#	            'tcp://127.0.0.1:9997', 
-#	            '34f9ceee-cd52-4b7f-b197-88bf2f0ec378', 
+#	            'tcp://127.0.0.1:9997',
+#	            '34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
 #	            'tcp://127.0.0.1:9996'
-#	        ) 
+#	        )
 #
-#	        # a sample proxy route 
-#	        web_app_proxy = proxy( '127.0.0.1', 8080 ) 
+#	        # a sample proxy route
+#	        web_app_proxy = proxy( '127.0.0.1', 8080 )
 #
 #	        route '/chat/', web_app_proxy
 #	        route '/', web_app_proxy
 #
-#	        # here's a sample directory 
+#	        # here's a sample directory
 #	        test_directory = directory(
 #	            'tests/',
 #	            :index_file => 'index.html',
@@ -53,34 +53,34 @@ require 'mongrel2/config' unless defined?( Mongrel2::Config )
 #	        route '/testsmulti/(.*.json)', test_directory
 #
 #	        chat_demo_dir = directory(
-#	            'examples/chat/static/', 
-#	            :index_file => 'index.html', 
+#	            'examples/chat/static/',
+#	            :index_file => 'index.html',
 #	            :default_ctype => 'text/plain'
 #	        )
 #
 #	        route '/chatdemo/', chat_demo_dir
 #	        route '/static/', chat_demo_dir
 #
-#	        route '/mp3stream', handler( 
-#	            'tcp://127.0.0.1:9995', 
-#	            '53f9f1d1-1116-4751-b6ff-4fbe3e43d142', 
+#	        route '/mp3stream', handler(
+#	            'tcp://127.0.0.1:9995',
+#	            '53f9f1d1-1116-4751-b6ff-4fbe3e43d142',
 #	            'tcp://127.0.0.1:9994'
-#	        ) 
+#	        )
 #	    end
 #
 #	end
 #
 #	settings(
 #	    "zeromq.threads"         => 1,
-#	    "upload.temp_store"      => "/home/zedshaw/projects/mongrel2/tmp/upload.XXXXXX", 
-#	    "upload.temp_store_mode" => "0666" 
+#	    "upload.temp_store"      => "/home/zedshaw/projects/mongrel2/tmp/upload.XXXXXX",
+#	    "upload.temp_store_mode" => "0666"
 #	)
 #
 module Mongrel2::Config::DSL
 
 
 	# A decorator object that provides the DSL-ish interface to the various Config
-	# objects. It derives its interface on the fly from columns of the class it's 
+	# objects. It derives its interface on the fly from columns of the class it's
 	# created with and a DSLMethods mixin if the target class defines one.
 	class Adapter
 		include Mongrel2::Loggable
@@ -144,7 +144,7 @@ module Mongrel2::Config::DSL
 	end # class Adapter
 
 
-	### Create a Mongrel2::Config::Server with the specified +uuid+, evaluate 
+	### Create a Mongrel2::Config::Server with the specified +uuid+, evaluate
 	### the block (if given) within its context, and return it.
 	def server( uuid, &block )
 		Mongrel2::Config.init_database

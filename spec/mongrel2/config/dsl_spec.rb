@@ -214,5 +214,32 @@ describe Mongrel2::Config::DSL do
 
 	end
 
+	describe 'filters' do
+
+		it "can add a filter to a server" do
+			result = server '965A7196-99BC-46FA-945B-3478AE92BFB5' do
+				filter '/usr/lib/mongrel2/null.so'
+			end
+
+			result.filters.should have( 1 ).member
+			result.filters.first.should be_a( Mongrel2::Config::Filter )
+			result.filters.first.settings.should == {}
+		end
+
+		it "can add a filter with settings to a server" do
+			result = server '965A7196-99BC-46FA-945B-3478AE92BFB5' do
+				filter '/usr/lib/mongrel2/null.so',
+					extensions: ["*.html", "*.txt"],
+					min_size: 1000
+			end
+
+			result.filters.should have( 1 ).member
+			result.filters.first.should be_a( Mongrel2::Config::Filter )
+			result.filters.first.settings.should ==
+				{ 'extensions' => ["*.html", "*.txt"], 'min_size' => 1000 }
+		end
+
+	end
+
 end
 

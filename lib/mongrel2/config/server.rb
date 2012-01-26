@@ -24,6 +24,8 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 	#     use_ssl INTEGER default 0);
 
 	one_to_many :hosts
+	one_to_many :filters
+
 
 	##
 	# Look up a server by its +uuid+.
@@ -41,7 +43,7 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 
 		scheme, sock_path = csock_uri.split( '://', 2 )
 		Mongrel2.log.debug "  chrooted socket path is: %p" % [ sock_path ]
-		
+
 		csock_path = Pathname( self.chroot ) + sock_path
 		Mongrel2.log.debug "  fully-qualified path is: %p" % [ csock_path ]
 		csock_uri = "%s:/%s" % [ scheme, csock_path ]
@@ -55,8 +57,8 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 	def control_socket
 		return Mongrel2::Control.new( self.control_socket_uri )
 	end
-	
-	
+
+
 	### Return a Pathname for the server's PID file with its chroot directory prepended.
 	def pid_file_path
 		base = Pathname( self.chroot )
@@ -65,7 +67,7 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 
 		return base + pidfile
 	end
-	
+
 
 	#
 	# :section: Validation Callbacks
@@ -94,6 +96,14 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 			self.target.add_host( adapter.target )
 		end
 
+		### Add a Mongrel2::Config::Filter to the Server object with the specified
+		### +path+ (name) and +settings+ hash.
+		def filter( path, settings={} )
+			self.target.save( :validate => false )
+
+			Mongrel2.log.debug "Filter [%s]: %p" % [ path, settings ]
+			self.target.add_filter( name: path, settings: settings )
+		end
 
 	end # module DSLMethods
 

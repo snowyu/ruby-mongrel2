@@ -1,5 +1,3 @@
-begin transaction;
-
 DROP TABLE IF EXISTS server;
 DROP TABLE IF EXISTS host;
 DROP TABLE IF EXISTS handler;
@@ -9,6 +7,7 @@ DROP TABLE IF EXISTS statistic;
 DROP TABLE IF EXISTS mimetype;
 DROP TABLE IF EXISTS setting;
 DROP TABLE IF EXISTS directory;
+DROP TABLE IF EXISTS filter;
 
 CREATE TABLE server (id INTEGER PRIMARY KEY,
     uuid TEXT,
@@ -53,14 +52,12 @@ CREATE TABLE route (id INTEGER PRIMARY KEY,
     target_id INTEGER,
     target_type TEXT);
 
-
 CREATE TABLE setting (id INTEGER PRIMARY KEY, key TEXT, value TEXT);
-
 
 CREATE TABLE statistic (id SERIAL,
     other_type TEXT,
     other_id INTEGER,
-    name text,
+    name TEXT,
     sum REAL,
     sumsq REAL,
     n INTEGER,
@@ -70,8 +67,12 @@ CREATE TABLE statistic (id SERIAL,
     sd REAL,
     primary key (other_type, other_id, name));
 
-
 CREATE TABLE mimetype (id INTEGER PRIMARY KEY, mimetype TEXT, extension TEXT);
+
+CREATE TABLE filter (id INTEGER PRIMARY KEY,
+    server_id INTEGER,
+    name TEXT,
+    settings TEXT);
 
 CREATE TABLE IF NOT EXISTS log(id INTEGER PRIMARY KEY,
     who TEXT,
@@ -81,4 +82,3 @@ CREATE TABLE IF NOT EXISTS log(id INTEGER PRIMARY KEY,
     how TEXT,
     why TEXT);
 
-commit;
