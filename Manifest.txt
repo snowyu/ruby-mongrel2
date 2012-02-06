@@ -20,6 +20,7 @@ lib/mongrel2.rb
 lib/mongrel2/config.rb
 lib/mongrel2/config/directory.rb
 lib/mongrel2/config/dsl.rb
+lib/mongrel2/config/filter.rb
 lib/mongrel2/config/handler.rb
 lib/mongrel2/config/host.rb
 lib/mongrel2/config/log.rb
@@ -49,6 +50,7 @@ spec/lib/helpers.rb
 spec/lib/matchers.rb
 spec/mongrel2/config/directory_spec.rb
 spec/mongrel2/config/dsl_spec.rb
+spec/mongrel2/config/filter_spec.rb
 spec/mongrel2/config/handler_spec.rb
 spec/mongrel2/config/host_spec.rb
 spec/mongrel2/config/log_spec.rb
