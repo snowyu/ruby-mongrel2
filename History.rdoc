@@ -1,4 +1,4 @@
-== v0.10.0 [2012-01-25] Michael Granger <ged@FaerieMUD.org>
+== v0.10.0 [2012-02-06] Michael Granger <ged@FaerieMUD.org>
 
 This release includes updates for Mongrel 1.8 and finishes up the m2sh.rb tool.
 
