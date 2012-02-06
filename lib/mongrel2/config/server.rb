@@ -90,11 +90,12 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 			self.target.save( :validate => false )
 
 			Mongrel2.log.debug "Host [%s] (block: %p)" % [ name, block ]
-			adapter = Mongrel2::Config::DSL::Adapter.new( Mongrel2::Config::Host,
-				:name => name, :matching => name )
+			adapter = Mongrel2::Config::DSL::Adapter.new( Mongrel2::Config::Host, name: name )
+			adapter.target.matching = name
 			adapter.instance_eval( &block ) if block
 			self.target.add_host( adapter.target )
 		end
+
 
 		### Add a Mongrel2::Config::Filter to the Server object with the specified
 		### +path+ (name) and +settings+ hash.
