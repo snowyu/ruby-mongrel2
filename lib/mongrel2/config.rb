@@ -146,7 +146,7 @@ module Mongrel2
 
 			return setting_hash
 		end
-		
+
 
 		### Return the contents of the configuration schema SQL file.
 		def self::load_config_schema

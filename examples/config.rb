@@ -21,32 +21,33 @@ Mongrel2.log.level = Logger::INFO
 Mongrel2::Config.configure( :configdb => 'examples.sqlite' )
 include Mongrel2::Config::DSL
 
-Mongrel2::Config.init_database!
-
-# the server to run them all 
+# the server to run them all
 server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
 
-    access_log   "/logs/access.log"
-    error_log    "/logs/error.log"
-    chroot       "/var/mongrel2"
-    pid_file     "/run/mongrel2.pid"
-    default_host "localhost"
-    name         "main"
-    port         8113
+	name         'main'
+	default_host 'www.example.com'
 
-	# your main host 
-	host "localhost" do
+	access_log   '/logs/access.log'
+	error_log    '/logs/error.log'
+	chroot       '/var/mongrel2'
+	pid_file     '/run/mongrel2.pid'
+
+	bind_addr    '0.0.0.0'
+	port         8113
+
+	# your main host
+	host 'www.example.com' do
 
 		route '/', directory( 'data/mongrel2/', 'bootstrap.html', 'text/html' )
 		route '/source', directory( 'examples/', 'README.txt', 'text/plain' )
 
 		# Handlers
-		route '/hello', handler( 'tcp://127.0.0.1:9999',  'helloworld-handler' ) 
-		route '/dump', handler( 'tcp://127.0.0.1:9997', 'request-dumper' ) 
+		route '/hello', handler( 'tcp://127.0.0.1:9999',  'helloworld-handler' )
+		route '/dump', handler( 'tcp://127.0.0.1:9997', 'request-dumper' )
 
 	end
 
-	filter "/usr/local/lib/mongrel2/filters/null.so",
+	filter '/usr/local/lib/mongrel2/filters/null.so',
 		extensions: ["*.html", "*.txt"],
 		min_size: 1000
 

@@ -42,7 +42,7 @@ fi
 #
 filename=".rvm.gems"
 if [[ -s "$filename" ]];  then
-   rvm gemset import "$filename" | grep -v already | grep -v listed | grep -v complete | sed '/^$/d'
+   rvm gemset import "$filename"
 fi
 
 

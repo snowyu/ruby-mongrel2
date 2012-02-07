@@ -31,6 +31,13 @@ describe Mongrel2::Config::DSL do
 		setup_config_db()
 	end
 
+	before( :each ) do
+		Mongrel2::Config::Server.truncate
+		Mongrel2::Config::Host.truncate
+		Mongrel2::Config::Route.truncate
+		Mongrel2::Config::Filter.truncate
+	end
+
 	after( :all ) do
 		reset_logging()
 	end
@@ -160,6 +167,14 @@ describe Mongrel2::Config::DSL do
 	end
 
 	describe 'settings' do
+
+		before( :all ) do
+			@ids = Mongrel2::Config::Setting.map( :id )
+		end
+
+		after( :each ) do
+			Mongrel2::Config::Setting.dataset.filter( ~:id => @ids ).delete
+		end
 
 		it "can set the expert tweakable settings en masse" do
 			result = settings(

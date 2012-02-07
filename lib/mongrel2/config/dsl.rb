@@ -85,10 +85,19 @@ module Mongrel2::Config::DSL
 	class Adapter
 		include Mongrel2::Loggable
 
-		### Adapt the specified +target+ to use a declarative interface.
+		### Create an instance of the specified +targetclass+ using the specified +opts+
+		### as initial values. The first pair of +opts+ will be used in the filter to
+		### find any previous instance and delete it.
 		def initialize( targetclass, opts={} )
 			self.log.debug "Wrapping a %p" % [ targetclass ]
 			@targetclass = targetclass
+
+			# Use the first pair as the primary key
+			unless opts.empty?
+				first_pair = Hash[ *opts.first ]
+				@targetclass.filter( first_pair ).destroy
+			end
+
 			@target = @targetclass.new( opts )
 			self.decorate_with_column_declaratives( @target )
 			self.decorate_with_custom_declaratives( @targetclass )
@@ -147,11 +156,29 @@ module Mongrel2::Config::DSL
 	### Create a Mongrel2::Config::Server with the specified +uuid+, evaluate
 	### the block (if given) within its context, and return it.
 	def server( uuid, &block )
-		Mongrel2::Config.init_database
+		adapter = nil
 
-		Mongrel2.log.debug "Server [%s] (block: %p)" % [ uuid, block ]
-		adapter = Adapter.new( Mongrel2::Config::Server, :uuid => uuid )
-		adapter.instance_eval( &block ) if block
+		Mongrel2::Config.db.transaction do
+			Mongrel2::Config.init_database
+
+			# Set up the options hash with the UUID and reasonable defaults
+			# for everything else
+			server_opts = {
+				uuid:         uuid,
+			    access_log:   "/logs/admin-access.log",
+			    error_log:    "/logs/admin-error.log",
+			    pid_file:     "/run/admin-mongrel2.pid",
+			    default_host: "localhost",
+			    port:         8888,
+			}
+
+			Mongrel2.log.debug "Server [%s] (block: %p)" % [ uuid, block ]
+			adapter = Adapter.new( Mongrel2::Config::Server, server_opts )
+			adapter.instance_eval( &block ) if block
+
+			adapter.target.save
+		end
+
 		return adapter.target
 	end
 
@@ -159,7 +186,9 @@ module Mongrel2::Config::DSL
 	### Set the value of one of the 'Tweakable Expert Settings'
 	def setting( key, val )
 		Mongrel2::Config.init_database
-		return Mongrel2::Config::Setting.create( :key => key, :value => val )
+		setting = Mongrel2::Config::Setting.find_or_create( key: key )
+		setting.value = val
+		setting.save
 	end
 
 
@@ -181,7 +210,7 @@ module Mongrel2::Config::DSL
 	def mimetype( extension, mimetype )
 		Mongrel2::Config.init_database
 
-		type = Mongrel2::Config::Mimetype.find_or_create( :extension => extension )
+		type = Mongrel2::Config::Mimetype.find_or_create( extension: extension )
 		type.mimetype = mimetype
 		type.save
 

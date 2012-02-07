@@ -293,7 +293,7 @@ class Mongrel2::M2SHCommand
 
 		header "Loading config from #{configfile}"
 		source = File.read( configfile )
-		Mongrel2::Config.init_database!
+
 		runspace.module_eval( source, configfile, 0 )
 	end
 	help :load, "Overwrite the config database with the values from the speciifed CONFIGFILE."
@@ -406,7 +406,7 @@ class Mongrel2::M2SHCommand
 	def servers_command( * )
 		header 'SERVERS:'
 		Mongrel2::Config.servers.each do |server|
-			message "%s  [%s]: %s" % [
+			message "%s [%s]: %s" % [
 				self.prompt.color( server.name, :key ),
 				server.default_host,
 				server.uuid,

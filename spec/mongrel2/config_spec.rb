@@ -54,7 +54,8 @@ describe Mongrel2::Config do
 
 	it "has a convenience method for fetching an Array of all of its configured servers" do
 		Mongrel2::Config.init_database
-		Mongrel2::Config::Server.dataset.truncate
+		Mongrel2::Config::Server.truncate
+
 		s = Mongrel2::Config::Server.create(
 			uuid: TEST_UUID,
 			access_log: '/log/access.log',

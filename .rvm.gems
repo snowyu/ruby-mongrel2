@@ -1,4 +1,5 @@
 # .rvm.gems generated gem export file. Note that any env variable settings will be missing. Append these after using a ';' field separator
+hoe-deveiate -v0.0.8
 amalgalite -v1.1.2
 arrayfields -v4.7.4
 configurability -v1.0.8
