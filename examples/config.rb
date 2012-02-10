@@ -1,27 +1,11 @@
 #!/usr/bin/env ruby
 
-# The Mongrel config used by the examples. 
+# The Mongrel config used by the examples. Load it with:
+#
+#   m2sh.rb -c examples.sqlite load examples/config.rb
+#
 
-BEGIN {
-	require 'pathname'
-	basedir = Pathname( __FILE__ ).dirname.parent
-	libdir = basedir + 'lib'
-
-	$LOAD_PATH.unshift( libdir.to_s )
-}
-
-require 'rubygems'
-require 'fileutils'
-require 'mongrel2'
-require 'mongrel2/config'
-
-include FileUtils::Verbose
-
-Mongrel2.log.level = Logger::INFO
-Mongrel2::Config.configure( :configdb => 'examples.sqlite' )
-include Mongrel2::Config::DSL
-
-# the server to run them all
+# samples server
 server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
 
 	name         'main'
@@ -54,7 +38,4 @@ server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
 end
 
 setting "zeromq.threads", 1
-
-mkdir_p 'run'
-mkdir_p 'logs'
 
