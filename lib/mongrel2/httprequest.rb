@@ -60,9 +60,21 @@ class Mongrel2::HTTPRequest < Mongrel2::Request
 	end
 
 
+	### Set the current request's Content-Type.
+	def content_type=( type )
+		return self.headers.content_type = type
+	end
+
+
 	### Fetch the encoding type of the request's content, as set in its header.
 	def content_encoding
 		return self.headers.content_encoding
+	end
+
+
+	### Set the request's encoding type.
+	def content_encoding=( type )
+		return self.headers.content_encoding = type
 	end
 
 

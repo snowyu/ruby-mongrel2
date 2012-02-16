@@ -97,8 +97,18 @@ describe Mongrel2::HTTPRequest do
 			@req.content_type.should == 'application/x-pdf'
 		end
 
+		it "provides a convenience method for resetting the 'Content-type' header" do
+			@req.content_type = 'application/json'
+			@req.content_type.should == 'application/json'
+		end
+
 		it "provides a convenience method for fetching the 'Content-encoding' header" do
 			@req.content_encoding.should == 'gzip'
+		end
+
+		it "provides a convenience method for resetting the 'Content-encoding' header" do
+			@req.content_encoding = 'identity'
+			@req.content_encoding.should == 'identity'
 		end
 
 	end
