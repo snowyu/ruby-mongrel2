@@ -78,6 +78,7 @@ schema, etc.
   * Mongrel2::Config::Setting
   * Mongrel2::Config::Mimetype
   * Mongrel2::Config::Statistic
+  * Mongrel2::Config::Filter
   * Mongrel2::Config::Log
 
 
