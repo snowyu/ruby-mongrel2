@@ -20,7 +20,7 @@ Hoe.plugins.delete :rubyforge
 hoespec = Hoe.spec 'mongrel2' do
 	self.readme_file = 'README.rdoc'
 	self.history_file = 'History.rdoc'
-	self.extra_rdoc_files << 'README.rdoc' << 'History.rdoc'
+	self.extra_rdoc_files = Rake::FileList[ '*.rdoc' ]
 	self.spec_extras[:rdoc_options] = ['-t', 'Ruby-Mongrel2']
 
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'

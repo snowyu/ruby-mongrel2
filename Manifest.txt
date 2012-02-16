@@ -1,6 +1,7 @@
 .autotest
 .gemtest
 ChangeLog
+DSL.rdoc
 History.rdoc
 Manifest.txt
 README.rdoc
