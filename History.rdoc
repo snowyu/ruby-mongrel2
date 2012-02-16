@@ -1,3 +1,11 @@
+== v0.11.0 [2012-02-15] Michael Granger <ged@FaerieMUD.org>
+
+- Make the DSL declarations replace existing records.
+- Flesh out the documentation for the DSL
+- Provide convenience methods for resetting an HTTP request's
+  Content-type and Content-encoding headers.
+
+
 == v0.10.0 [2012-02-06] Michael Granger <ged@FaerieMUD.org>
 
 This release includes updates for Mongrel 1.8 and finishes up the m2sh.rb tool.
