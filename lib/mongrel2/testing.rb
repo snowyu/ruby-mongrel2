@@ -133,6 +133,35 @@ module Mongrel2
 		end
 
 
+		### Create a new PUT Mongrel2::Request for the specified +uri+ with
+		### the given +body+ and +headers+.
+		def put( uri, body='', headers={} )
+			raise "Request doesn't route through %p" % [ self.route ] unless
+				uri.start_with?( self.route )
+
+			headers = self.make_merged_headers( :PUT, uri, headers )
+			rclass = Mongrel2::Request.subclass_for_method( :PUT )
+
+			req = rclass.new( self.sender_id, self.conn_id.to_s, uri.to_s, headers )
+			req.body = body
+
+			return req
+		end
+
+
+		### Create a new DELETE Mongrel2::Request for the specified +uri+ with
+		### the given +headers+.
+		def delete( uri, headers={} )
+			raise "Request doesn't route through %p" % [ self.route ] unless
+				uri.start_with?( self.route )
+
+			headers = self.make_merged_headers( :DELETE, uri, headers )
+			rclass = Mongrel2::Request.subclass_for_method( :DELETE )
+
+			return rclass.new( self.sender_id, self.conn_id.to_s, uri.to_s, headers )
+		end
+
+
 		#########
 		protected
 		#########
