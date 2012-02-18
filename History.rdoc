@@ -1,3 +1,10 @@
+== v0.12.0 [2012-02-17] Michael Granger <ged@FaerieMUD.org>
+
+- Add bodiless response predicate to Mongrel2::HTTPResponse.
+- Add #put and #delete factory methods to the Mongrel2::RequestFactory.
+- Flesh out docs for the Filter config class.
+
+
 == v0.11.0 [2012-02-15] Michael Granger <ged@FaerieMUD.org>
 
 - Make the DSL declarations replace existing records.
