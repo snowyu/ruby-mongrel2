@@ -183,6 +183,18 @@ describe Mongrel2::HTTPResponse do
 	end
 
 
+	it "knows that a 100 response shouldn't have a body" do
+		@response.status = HTTP::CONTINUE
+		@response.should be_bodiless()
+	end
+
+
+	it "knows that a 204 response shouldn't have a body" do
+		@response.status = HTTP::NO_CONTENT
+		@response.should be_bodiless()
+	end
+
+
 	it "knows what the response content type is" do
 		@response.headers['Content-Type'] = 'text/erotica'
 		@response.content_type.should == 'text/erotica'

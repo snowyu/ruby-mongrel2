@@ -80,6 +80,13 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	alias_method :is_handled?, :handled?
 
 
+	### Returns true if the response status means the response
+	### shouldn't have a body.
+	def bodiless?
+		return HTTP::BODILESS_HTTP_RESPONSE_CODES.include?( self.status )
+	end
+
+
 	### Return the numeric category of the response's status code (1-5)
 	def status_category
 		return 0 if self.status.nil?

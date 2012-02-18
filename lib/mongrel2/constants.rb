@@ -153,6 +153,18 @@ module Mongrel2::Constants
 		    510 => "Not Extended"
 		}
 
+		# A registry of HTTP status codes that don't allow an entity body
+		# in the response.
+		BODILESS_HTTP_RESPONSE_CODES = [
+			CONTINUE,
+			SWITCHING_PROTOCOLS,
+			PROCESSING,
+			NO_CONTENT,
+			RESET_CONTENT,
+			NOT_MODIFIED,
+			USE_PROXY,
+		]
+
 	end
 
 
