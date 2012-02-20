@@ -52,6 +52,14 @@ describe Mongrel2::HTTPResponse do
 		@response.status_line.should == 'HTTP/1.1 204 No Content'
 	end
 
+	it "returns an empty response if its status is set to NO_CONTENT" do
+		@response.puts "The response body"
+		@response.status = HTTP::NO_CONTENT
+		@response.header_data.should =~ /Content-length: 0/i
+		@response.header_data.should_not =~ /Content-type/i
+		@response.to_s.should_not =~ /The response body/i
+	end
+
 	it "sets Date, Content-type, and Content-length headers automatically if they haven't been set" do
 		@response << "Some stuff."
 
@@ -215,6 +223,11 @@ describe Mongrel2::HTTPResponse do
 		@response.get_content_length.should == test_body_content.length
 	end
 
+
+	it "returns a body length of 0 if it's a bodiless reponse" do
+		@response.status = HTTP::NO_CONTENT
+		@response.get_content_length.should == 0
+	end
 
 	it "raises a descriptive error message if it can't get the body's length" do
 		@response.body = Object.new

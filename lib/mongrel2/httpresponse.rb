@@ -59,7 +59,7 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 		return [
 			self.status_line,
 			self.header_data,
-			self.body
+			self.bodiless? ? '' : self.body
 		].join( "\r\n" )
 	end
 
@@ -160,7 +160,12 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 
 		headers[:date] ||= Time.now.httpdate
 		headers[:content_length] ||= self.get_content_length
-		headers[:content_type] ||= DEFAULT_CONTENT_TYPE.dup
+
+		if self.bodiless?
+			headers.delete( :content_type )
+		else
+			headers[:content_type] ||= DEFAULT_CONTENT_TYPE.dup
+		end
 
 		return headers
 	end
@@ -170,7 +175,9 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 	### one, or using #seek and #tell if it implements those. If neither of those are
 	### possible, an exception is raised.
 	def get_content_length
-		if self.body.respond_to?( :bytesize )
+		if self.bodiless?
+			return 0
+		elsif self.body.respond_to?( :bytesize )
 			return self.body.bytesize
 		elsif self.body.respond_to?( :seek ) && self.body.respond_to?( :tell )
 			starting_pos = self.body.tell
