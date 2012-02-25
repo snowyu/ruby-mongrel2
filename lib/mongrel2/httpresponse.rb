@@ -99,6 +99,7 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 		return self.status_category == 1
 	end
 
+
 	### Return true if response is in the 2XX range
 	def status_is_successful?
 		return self.status_category == 2
