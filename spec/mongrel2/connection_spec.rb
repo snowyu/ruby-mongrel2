@@ -61,7 +61,7 @@ describe Mongrel2::Connection do
 
 		@ctx.should_receive( :socket ).with( ZMQ::PUB ).and_return( response_sock )
 		response_sock.should_receive( :setsockopt ).with( ZMQ::LINGER, 0 )
-		response_sock.should_receive( :setsockopt ).with( ZMQ::IDENTITY, TEST_UUID )
+		response_sock.should_receive( :setsockopt ).with( ZMQ::IDENTITY, /^[[:xdigit:]]{40}$/ )
 		response_sock.should_receive( :connect ).with( TEST_RECV_SPEC )
 
 		@conn.request_sock.should == request_sock

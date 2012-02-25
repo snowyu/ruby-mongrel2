@@ -1,7 +1,9 @@
 #!/usr/bin/ruby
 
+require 'socket'
 require 'zmq'
 require 'yajl'
+require 'digest/sha1'
 
 require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/mixins'
@@ -22,12 +24,14 @@ class Mongrel2::Connection
 	### will connect to a Mongrel2 server on the +sub_addr+ and +pub_addr+ (e.g., 
 	### 'tcp://127.0.0.1:9998').
 	def initialize( app_id, sub_addr, pub_addr )
-		@app_id   = app_id
-		@sub_addr = sub_addr
-		@pub_addr = pub_addr
+		@app_id       = app_id
+		@sub_addr     = sub_addr
+		@pub_addr     = pub_addr
 
 		@request_sock = @response_sock = nil
-		@closed = false
+
+		@identifier   = make_identifier( app_id )
+		@closed       = false
 	end
 
 
@@ -43,8 +47,11 @@ class Mongrel2::Connection
 	public
 	######
 
-	# The application's UUID that identifies it to Mongrel2
+	# The application's identifier string that associates it with its route
 	attr_reader :app_id
+
+	# The ZMQ socket identity used by this connection
+	attr_reader :identifier
 
 	# The connection's subscription (request) socket address
 	attr_reader :sub_addr
@@ -58,16 +65,16 @@ class Mongrel2::Connection
 		ctx = Mongrel2.zmq_context
 		self.log.debug "0mq Context is: %p" % [ ctx ]
 
-		self.log.info "Connecting PULL request socket (%s)" % [ @sub_addr ]
+		self.log.info "Connecting PULL request socket (%s)" % [ self.sub_addr ]
 		@request_sock  = ctx.socket( ZMQ::PULL )
 		@request_sock.setsockopt( ZMQ::LINGER, 0 )
-		@request_sock.connect( @sub_addr )
+		@request_sock.connect( self.sub_addr )
 
-		self.log.info "Connecting PUB response socket (%s)" % [ @pub_addr ]
+		self.log.info "Connecting PUB response socket (%s)" % [ self.pub_addr ]
 		@response_sock  = ctx.socket( ZMQ::PUB )
-		@response_sock.setsockopt( ZMQ::IDENTITY, @app_id )
+		@response_sock.setsockopt( ZMQ::IDENTITY, self.identifier )
 		@response_sock.setsockopt( ZMQ::LINGER, 0 )
-		@response_sock.connect( @pub_addr )
+		@response_sock.connect( self.pub_addr )
 	end
 
 
@@ -114,7 +121,7 @@ class Mongrel2::Connection
 		buf = header + ' ' + data
 		self.log.debug "Sending response (PUB): %p" % [ buf ]
 		self.response_sock.send( buf )
-		self.log.debug "  done with send."
+		self.log.debug "  done with send (%d bytes)" % [ buf.bytesize ]
 	end
 
 
@@ -212,6 +219,23 @@ class Mongrel2::Connection
 	### if it has.
 	def check_closed
 		raise Mongrel2::ConnectionError, "operation on closed Connection" if self.closed?
+	end
+
+
+	#######
+	private
+	#######
+
+	### Make a unique identifier for this connection's socket based on the +app_id+
+	### and some other stuff.
+	def make_identifier( app_id )
+		identifier = Digest::SHA1.new
+		identifier << app_id
+		identifier << Socket.gethostname
+		identifier << Process.pid.to_s
+		identifier << Time.now.to_s
+
+		return identifier.hexdigest
 	end
 
 end # class Mongrel2::Connection
