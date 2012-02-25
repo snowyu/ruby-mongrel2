@@ -46,7 +46,7 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 
 		csock_path = Pathname( self.chroot ) + sock_path
 		Mongrel2.log.debug "  fully-qualified path is: %p" % [ csock_path ]
-		csock_uri = "%s:/%s" % [ scheme, csock_path ]
+		csock_uri = "%s://%s" % [ scheme, csock_path ]
 
 		Mongrel2.log.debug "  control socket URI is: %p" % [ csock_uri ]
 		return csock_uri

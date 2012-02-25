@@ -83,13 +83,13 @@ describe Mongrel2::Config::Server do
 
 	it "knows where its control socket is if there's no setting for control_port" do
 		Mongrel2::Config::Setting.dataset.truncate
-		@server.control_socket_uri.should == 'ipc://usr/local/www/run/control'
+		@server.control_socket_uri.should == 'ipc:///usr/local/www/run/control'
 	end
 
 	it "knows where its control socket is if there is a setting for control_port" do
 		Mongrel2::Config::Setting.dataset.truncate
 		Mongrel2::Config::Setting.create( key: 'control_port', value: 'ipc://var/run/control.sock' )
-		@server.control_socket_uri.should == 'ipc://usr/local/www/var/run/control.sock'
+		@server.control_socket_uri.should == 'ipc:///usr/local/www/var/run/control.sock'
 	end
 
 	it "can create a Mongrel2::Control for its control port" do
