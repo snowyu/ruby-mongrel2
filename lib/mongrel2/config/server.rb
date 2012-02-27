@@ -28,11 +28,11 @@ class Mongrel2::Config::Server < Mongrel2::Config( :server )
 
 
 	##
-	# Look up a server by its +uuid+.
+	# Return the dataset for looking up a server by its UUID.
 	# :singleton-method: by_uuid
 	# :call-seq:
 	#    by_uuid( uuid )
-	def_dataset_method( :by_uuid ) {|uuid| filter(:uuid => uuid).first }
+	def_dataset_method( :by_uuid ) {|uuid| filter(:uuid => uuid).limit(1) }
 
 
 	### Return the URI for its control socket.
