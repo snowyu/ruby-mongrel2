@@ -93,6 +93,18 @@ module Mongrel2
 		# :section: HTTP verb methods
 		#
 
+		### Create a new OPTIONS Mongrel2::Request with the specified +uri+ and +headers+.
+		def options( uri, headers={} )
+			raise "Request doesn't route through %p" % [ self.route ] unless
+				uri.start_with?( self.route )
+
+			headers = self.make_merged_headers( :OPTIONS, uri, headers )
+			rclass = Mongrel2::Request.subclass_for_method( :OPTIONS )
+
+			return rclass.new( self.sender_id, self.conn_id.to_s, uri.to_s, headers )
+		end
+
+
 		### Create a new GET Mongrel2::Request for the specified +uri+ and +headers+.
 		def get( uri, headers={} )
 			raise "Request doesn't route through %p" % [ self.route ] unless
