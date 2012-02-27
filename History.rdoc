@@ -1,3 +1,9 @@
+== v0.15.0 [2012-02-27] Michael Granger <ged@FaerieMUD.org>
+
+- Fix the Mongrel2::Config::Server.by_uuid dataset method to return a
+  dataset instead of the instance.
+
+
 == v0.14.0 [2012-02-27] Michael Granger <ged@FaerieMUD.org>
 
 - Add an alias for #headers -> #header to Mongrel2::Request and
