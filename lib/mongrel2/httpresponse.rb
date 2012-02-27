@@ -49,6 +49,7 @@ class Mongrel2::HTTPResponse < Mongrel2::Response
 
 	# The response headers (a Mongrel2::Table)
 	attr_reader :headers
+	alias_method :header, :headers
 
 	# The HTTP status code
 	attr_accessor :status

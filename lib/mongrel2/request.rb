@@ -134,6 +134,7 @@ class Mongrel2::Request
 
 	# The Mongrel2::Table object that contains the request headers
 	attr_reader :headers
+	alias_method :header, :headers
 
 	# The request body data, if there is any, as a String
 	attr_reader :body
