@@ -1,3 +1,10 @@
+== v0.14.0 [2012-02-27] Michael Granger <ged@FaerieMUD.org>
+
+- Add an alias for #headers -> #header to Mongrel2::Request and
+  Mongrel2::HTTPResponse.
+- Add an OPTIONS request factory method to the Mongrel2::RequestFactory
+
+
 == v0.13.0 [2012-02-24] Michael Granger <ged@FaerieMUD.org>
 
 - Fix the ZMQ socket identifier used by Connection.
