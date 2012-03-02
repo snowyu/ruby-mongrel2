@@ -110,11 +110,12 @@ class Mongrel2::Connection
 	### Fetch the next request from the server as a Mongrel2::Request object.
 	def receive
 		raw_req = self.recv
+		self.log.debug "Receive: parsing raw request: %d bytes" % [ raw_req.bytesize ]
 		return Mongrel2::Request.parse( raw_req )
 	end
 
 
-	### Write a raw +data+ to the given connection ID (+conn_id+) at the given +sender_id+.
+	### Write raw +data+ to the given connection ID (+conn_id+) at the given +sender_id+.
 	def send( sender_id, conn_id, data )
 		self.check_closed
         header = "%s %d:%s," % [ sender_id, conn_id.to_s.length, conn_id ]
