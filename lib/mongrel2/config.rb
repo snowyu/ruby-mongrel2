@@ -124,6 +124,9 @@ module Mongrel2
 			if self == Mongrel2::Config
 				Mongrel2.log.debug "Resetting database connection for %d config classes to: %p" %
 					[ self.descendents.length, newdb ]
+				newdb.logger = Mongrel2.logger
+				newdb.sql_log_level = :debug
+
 				self.descendents.each {|subclass| subclass.db = newdb }
 			end
 		end
