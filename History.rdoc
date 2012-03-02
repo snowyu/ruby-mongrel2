@@ -1,3 +1,13 @@
+== v0.15.1 [2012-03-02] Michael Granger <ged@FaerieMUD.org>
+
+- Make sure Mongrel2::Config::Host deletes cascade to their routes
+- Init the database outside of the transaction in the "server" DSL
+  method
+- Remove the SAFE test from the request-dumper example
+- Correct the line number of errors in configs loaded from m2sh.rb
+- Log SQL to the logger at DEBUG level
+
+
 == v0.15.0 [2012-02-27] Michael Granger <ged@FaerieMUD.org>
 
 - Fix the Mongrel2::Config::Server.by_uuid dataset method to return a
