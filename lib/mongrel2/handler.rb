@@ -197,7 +197,8 @@ class Mongrel2::Handler
 				self.log.debug "XML message request."
 				return self.handle_xml( request )
 			else
-				self.log.error "Unhandled request type %p" % [ request.class ]
+				self.log.error "Unhandled request type %s (%p)" %
+					[ request.headers['METHOD'], request.class ]
 				return nil
 			end
 		end
