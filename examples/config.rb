@@ -31,10 +31,6 @@ server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
 
 	end
 
-	filter '/usr/local/lib/mongrel2/filters/null.so',
-		extensions: ["*.html", "*.txt"],
-		min_size: 1000
-
 end
 
 setting "zeromq.threads", 1
