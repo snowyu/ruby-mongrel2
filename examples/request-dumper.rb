@@ -22,28 +22,23 @@ class RequestDumper < Mongrel2::Handler
 
 	### Handle a request
 	def handle( request )
-		Thread.new do
-			Thread.current.abort_on_exception = true
-			$SAFE = 1
+		template = @template.dup
+		response = request.response
 
-			template = @template.dup
-			response = request.response
+		template.request = request
+		template.title = "Ruby-Mongrel2 Request Dumper"
+		template.safelevel = $SAFE
 
-			template.request = request
-			template.title = "Ruby-Mongrel2 Request Dumper"
-			template.safelevel = $SAFE
+		response.status = 200
+		response.headers.content_type = 'text/html'
+		response.puts( template )
 
-			response.status = 200
-			response.headers.content_type = 'text/html'
-			response.puts( template )
-
-			response
-		end.value
+		response
 	end
 
 end # class RequestDumper
 
-Mongrel2.log.level = $DEBUG ? Logger::DEBUG : Logger::INFO
+Mongrel2.log.level = Logger::DEBUG
 Inversion.log.level = Logger::INFO
 
 # Point to the config database, which will cause the handler to use
