@@ -294,7 +294,7 @@ class Mongrel2::M2SHCommand
 		header "Loading config from #{configfile}"
 		source = File.read( configfile )
 
-		runspace.module_eval( source, configfile, 0 )
+		runspace.module_eval( source, configfile, 1 )
 	end
 	help :load, "Overwrite the config database with the values from the speciifed CONFIGFILE."
 	usage :load, <<-END_USAGE
