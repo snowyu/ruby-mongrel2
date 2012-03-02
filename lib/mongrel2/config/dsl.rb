@@ -86,10 +86,11 @@ module Mongrel2::Config::DSL
 	def server( uuid, &block )
 		adapter = nil
 
+		Mongrel2.log.info "Ensuring db is set up..."
+		Mongrel2::Config.init_database
+
 		Mongrel2.log.info "Entering transaction for server %p" % [ uuid ]
 		Mongrel2::Config.db.transaction do
-			Mongrel2.log.info "  ensuring db is set up..."
-			Mongrel2::Config.init_database
 
 			# Set up the options hash with the UUID and reasonable defaults
 			# for everything else
