@@ -16,6 +16,13 @@ class Mongrel2::Config::Host < Mongrel2::Config( :host )
 	one_to_many :routes
 	many_to_one :server
 
+
+	### Clean up the host's routes when it's destroyed.
+	def before_destroy
+		self.routes.each( &:destroy )
+	end
+
+
 	### DSL methods for the Server context besides those automatically-generated from its
 	### columns.
 	module DSLMethods
