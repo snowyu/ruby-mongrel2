@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+	<script type="text/javascript">
+		var ws = null;
+		var ws_uri = "ws://localhost:8113/ws";
+		var log = null;
+
+		$(document).ready( function() {
+			log = $('#log');
+
+			if (window.MozWebSocket) {
+		        console.debug( 'Using MozWebSocket' );
+		        window.WebSocket = window.MozWebSocket;
+		    } else if (!window.WebSocket) {
+		        console.error( "This browser doesn't support WebSocket. ;_;" );
+		        return;
+		    }
+
+			$('#connect').click( doConnect );
+			$('#disconnect,#echo-body,#send').attr( 'disabled', 'disabled' );
+
+			writeToLog( "Ready." );
+		});
+
+		function writeToLog( msg ) {
+			$('#log').append( "<li>" + msg + "</li>\n");
+		}
+
+		function onOpen( e ) {
+			console.debug( "WebSocket open." );
+			writeToLog( "Connected." );
+
+			$('form').removeClass( 'socket-disconnected' );
+			$('#connect').unbind( 'click' ).attr( 'disabled', 'disabled' );
+			$('#disconnect').click( doDisconnect ).removeAttr('disabled');
+			$('#echo-body').removeAttr('disabled');
+			$('#send').click( doSend ).removeAttr('disabled');
+		}
+
+		function onClose( e ) {
+			console.debug( "WebSocket closed." );
+			writeToLog( "Disconnected." );
+
+			$('form').addClass( 'socket-disconnected' );
+			$('#connect').click( doConnect ).removeAttr('disabled');
+			$('#disconnect,#echo-body,#send').unbind( 'click' ).attr( 'disabled', 'disabled' );
+		}
+
+		function onMessage( e ) {
+			console.debug( "WebSocket message: %s.", e.data );
+			writeToLog( "Response: <code>" + e.data + "</code>" );
+		}
+
+		function onError( e ) {
+			console.error( "WebSocket error: %o", e );
+			writeToLog( "WebSocket Error: <span class=\"error\">" + e.data + "</span>" )
+		}
+
+		function doConnect( e ) {
+			console.debug( "Connecting WebSocket." );
+			writeToLog( "Connecting." );
+			ws = new WebSocket( ws_uri );
+
+			ws.onopen = onOpen;
+			ws.onclose = onClose;
+			ws.onmessage = onMessage;
+			ws.onerror = onError;
+		}
+
+		function doDisconnect( e ) {
+			console.debug( "Closing WebSocket." );
+			writeToLog( "Disconnecting." );
+			ws.close();
+		}
+
+		function doSend( e ) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			var data = $('#echo-body').val();
+			$('#echo-body').val('');
+
+			console.debug( "Sending message: %s.", data );
+			writeToLog( "Sent: <code>" + data + "</code>." );
+
+			ws.send( data );
+		}
+
+	</script>
+
+	<link rel="stylesheet" href="/css/master.css" type="text/css" media="screen"
+		title="no title" charset="utf-8" />
+
+</head>
+
+<body class="websocket-test">
+	<h1>WebSockets Echo Test</h1>
+
+	<form action="#" method="get" accept-charset="utf-8" class="socket-disconnected">
+		<label for="echo-body">Echo message:</label>
+		<input type="text" name="echo-body" value="" id="echo-body" disabled="disabled" />
+		<button id="send" disabled="disabled">Send</button>
+	</form>
+
+	<section id="connection-controls">
+		<button id="connect">Connect</button>
+		<button id="disconnect">Disconnect</button>
+	</section>
+
+	<section id="log-box">
+		<h2>Log:</h2>
+		<ul id="log"></ul>
+	</section>
+</body>
+</html>

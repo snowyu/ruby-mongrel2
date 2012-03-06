@@ -1,4 +1,5 @@
-/* @override http://pelimer.pg.laika.com:8113/css/master.css */
+/* @override http://pelimer.pg.laika.com:8113/css/master.css
+	http://localhost:8113/css/master.css */
 
 /*
  * Mongrel2 Examples Stylesheet
@@ -46,3 +47,31 @@ tbody th {
 	vertical-align: top;
 	white-space: pre;
 }
+
+
+/*
+ * WebSocket tester styles
+ */
+
+.websocket-test form {
+	margin: 2em 0;
+	padding: 2em;
+	border-radius: 0.5em;
+	background: rgba( 0,150,0, 0.25 );
+}
+
+.websocket-test form.socket-disconnected {
+	background: rgba( 50,50,50, 0.5 );
+}
+
+.websocket-test form input {
+	font-size: 1.4em;
+	width: 300px;
+	background: #eee;
+	border: 1px solid #aaa;
+}
+
+.websocket-test form.socket-disconnected input {
+	background: #ddd;
+}
+

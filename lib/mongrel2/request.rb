@@ -58,7 +58,7 @@ class Mongrel2::Request
 	###
 	###   class MyFramework::JSONRequest < Mongrel2::JSONRequest
 	###       register_request_type self, 'JSON'
-	###       
+	###
 	###       # Override #initialize to do any stuff specific to your
 	###       # request type, but you'll likely want to super() to
 	###       # Mongrel2::JSONRequest.
@@ -69,9 +69,10 @@ class Mongrel2::Request
 	###
 	###   end # class MyFramework::JSONRequest
 	###
-	### If you wish one of your subclasses to be used instead of Mongrel2::Request 
+	### If you wish one of your subclasses to be used instead of Mongrel2::Request
 	### for the default request class, register it with a METHOD of :__default.
 	def self::register_request_type( subclass, *req_methods )
+		Mongrel2.log.debug "Registering %p for %p requests" % [ subclass, req_methods ]
 		req_methods.each do |methname|
 			if methname == :__default
 				# Clear cached lookups
@@ -103,7 +104,7 @@ class Mongrel2::Request
 	###	I N S T A N C E   M E T H O D S
 	#################################################################
 
-	### Create a new Request object with the given +sender_id+, +conn_id+, +path+, +headers+, 
+	### Create a new Request object with the given +sender_id+, +conn_id+, +path+, +headers+,
 	### and +body+. The optional +nil+ is for the raw request content, which can be useful
 	### later for debugging.
 	def initialize( sender_id, conn_id, path, headers, body='', raw=nil )

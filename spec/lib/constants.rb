@@ -10,7 +10,8 @@ require 'mongrel2' unless defined?( Mongrel2 )
 ### A collection of constants used in testing
 module Mongrel2::TestConstants # :nodoc:all
 
-	include Mongrel2::Constants
+	include Mongrel2::Constants,
+	        Mongrel2::WebSocket::Constants
 
 	unless defined?( TEST_HOST )
 

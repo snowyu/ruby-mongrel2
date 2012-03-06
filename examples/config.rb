@@ -6,28 +6,32 @@
 #
 
 # samples server
-server '34D8E57C-3E91-4F24-9BBE-0B53C1827CB4' do
+server 'examples' do
 
-	name         'main'
-	default_host 'www.example.com'
+	name         'Examples'
+	default_host 'localhost'
 
 	access_log   '/logs/access.log'
 	error_log    '/logs/error.log'
 	chroot       '/var/mongrel2'
 	pid_file     '/run/mongrel2.pid'
 
-	bind_addr    '0.0.0.0'
+	bind_addr    '127.0.0.1'
 	port         8113
 
 	# your main host
-	host 'www.example.com' do
+	host 'localhost' do
 
 		route '/', directory( 'data/mongrel2/', 'bootstrap.html', 'text/html' )
 		route '/source', directory( 'examples/', 'README.txt', 'text/plain' )
 
 		# Handlers
+		dumper = handler( 'tcp://127.0.0.1:9997', 'request-dumper', protocol: 'tnetstring' )
 		route '/hello', handler( 'tcp://127.0.0.1:9999',  'helloworld-handler' )
-		route '/dump', handler( 'tcp://127.0.0.1:9997', 'request-dumper' )
+		route '/dump', dumper
+		route '/ws', handler( 'tcp://127.0.0.1:9995', 'ws-echo' )
+		route '@js', dumper
+		route '<xml', dumper
 
 	end
 

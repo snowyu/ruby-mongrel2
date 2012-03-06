@@ -17,6 +17,7 @@ require 'spec/lib/helpers'
 
 require 'mongrel2'
 require 'mongrel2/httprequest'
+require 'mongrel2/httpresponse'
 
 
 #####################################################################

@@ -8,6 +8,8 @@ require 'mongrel2/config'
 require 'mongrel2/request'
 require 'mongrel2/httprequest'
 require 'mongrel2/jsonrequest'
+require 'mongrel2/xmlrequest'
+require 'mongrel2/websocket'
 
 # Mongrel2 Handler application class. Instances of this class are the applications
 # which connection to one or more Mongrel2 routes and respond to requests.
@@ -18,27 +20,27 @@ require 'mongrel2/jsonrequest'
 # document with a timestamp.
 #
 #     #!/usr/bin/env ruby
-#     
+#
 #     require 'mongrel2/handler'
-#     
+#
 #     class HelloWorldHandler < Mongrel2::Handler
-#     
-#       ### The main method to override -- accepts requests and 
+#
+#       ### The main method to override -- accepts requests and
 #       ### returns responses.
 #       def handle( request )
 #           response = request.response
-#     
+#
 #           response.status = 200
 #           response.headers.content_type = 'text/plain'
 #           response.puts "Hello, world, it's #{Time.now}!"
-#           
+#
 #           return response
 #       end
-#     
+#
 #     end # class HelloWorldHandler
-#     
+#
 #     HelloWorldHandler.run( 'helloworld-handler' )
-# 
+#
 # This assumes the Mongrel2 SQLite config database is in the current
 # directory, and is named 'config.sqlite' (the Mongrel2 default), but
 # if it's somewhere else, you can point the Mongrel2::Config class
@@ -46,7 +48,7 @@ require 'mongrel2/jsonrequest'
 #
 #     require 'mongrel2/config'
 #     Mongrel2::Config.configure( :configdb => 'mongrel2.db' )
-# 
+#
 # Mongrel2 also includes support for Configurability, so you can
 # configure it along with your database connection, etc. Just add a
 # 'mongrel2' section to the config with a 'configdb' key that points
@@ -55,14 +57,14 @@ require 'mongrel2/jsonrequest'
 #     # config.yaml
 #     db:
 #       uri: postgres://www@localhost/db01
-#     
+#
 #     mongrel2:
 #       configdb: mongrel2.db
-#     
+#
 #     whatever_else:
 #       ...
-# 
-# Now just loading and installing the config configures Mongrel2 as 
+#
+# Now just loading and installing the config configures Mongrel2 as
 # well:
 #
 #     require 'configurability/config'
@@ -77,7 +79,7 @@ require 'mongrel2/jsonrequest'
 #     app = HelloWorldHandler.new( 'helloworld-handler',
 #         'tcp://otherhost:9999', 'tcp://otherhost:9998' )
 #     app.run
-#     
+#
 class Mongrel2::Handler
 	include Mongrel2::Loggable,
 	        Mongrel2::Constants
@@ -166,8 +168,6 @@ class Mongrel2::Handler
 			if res
 				self.log.info( res.inspect )
 				@conn.reply( res ) unless @conn.closed?
-			else
-				self.log.info "  no response; ignoring."
 			end
 		end
 	rescue ZMQ::Error => err
@@ -196,6 +196,9 @@ class Mongrel2::Handler
 			when Mongrel2::XMLRequest
 				self.log.debug "XML message request."
 				return self.handle_xml( request )
+			when Mongrel2::WebSocket::Frame
+				self.log.debug "WEBSOCKET message request."
+				return self.handle_websocket( request )
 			else
 				self.log.error "Unhandled request type %s (%p)" %
 					[ request.headers['METHOD'], request.class ]
@@ -236,19 +239,29 @@ class Mongrel2::Handler
 	end
 
 
-	### Handle a JSON message +request+. If not overridden, JSON message ('@route') 
+	### Handle a JSON message +request+. If not overridden, JSON message ('@route')
 	### requests are ignored.
 	def handle_json( request )
-		self.log.warn "Unhandled JSON message request (%p)" % [ request.headers[:path] ]
+		self.log.warn "Unhandled JSON message request (%p)" % [ request.headers.path ]
 		return nil
 	end
 
 
-	### Handle an XML message +request+. If not overridden, XML message ('<route') 
+	### Handle an XML message +request+. If not overridden, XML message ('<route')
 	### requests are ignored.
 	def handle_xml( request )
-		self.log.warn "Unhandled XML message request (%p)" % [ request.headers[:path] ]
+		self.log.warn "Unhandled XML message request (%p)" % [ request.headers.pack ]
 		return nil
+	end
+
+
+	### Handle a WebSocket frame in +request+. If not overridden, WebSocket connections are
+	### closed with a policy error status.
+	def handle_websocket( request )
+		self.log.warn "Unhandled WEBSOCKET message request (%p)" % [ request.headers.path ]
+		res = request.response
+		res.make_close_frame( WebSocket::CLOSE_POLICY_VIOLATION )
+		return res
 	end
 
 
@@ -268,7 +281,7 @@ class Mongrel2::Handler
 	#
 
 	### Set up signal handlers for SIGINT, SIGTERM, SIGINT, and SIGUSR1 that will call the
-	### #on_hangup_signal, #on_termination_signal, #on_interrupt_signal, and 
+	### #on_hangup_signal, #on_termination_signal, #on_interrupt_signal, and
 	### #on_user1_signal methods, respectively.
 	def set_signal_handlers
 		Signal.trap( :HUP,  &self.method(:on_hangup_signal) )

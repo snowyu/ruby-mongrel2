@@ -57,6 +57,7 @@ module Mongrel2
 	require 'mongrel2/httprequest'
 	require 'mongrel2/jsonrequest'
 	require 'mongrel2/xmlrequest'
+	require 'mongrel2/websocket'
 	require 'mongrel2/response'
 	require 'mongrel2/control'
 

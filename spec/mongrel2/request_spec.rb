@@ -113,7 +113,7 @@ describe Mongrel2::Request do
 	describe "framework support" do
 
 		before( :all ) do
-			@oldtypes = Mongrel2::Request.request_types
+			@oldtypes = Mongrel2::Request.request_types.dup
 			@original_default_proc = Mongrel2::Request.request_types.default_proc
 		end
 

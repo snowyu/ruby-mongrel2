@@ -67,11 +67,27 @@ module Mongrel2
 		end
 
 
+		### Return the default testing headers hash for the receiving class.
+		def self::default_headers
+			return const_get( :DEFAULT_TESTING_HEADERS )
+		end
+
+
+		### Return the default configuration for the receiving factory class.
+		def self::default_factory_config
+			return const_get( :DEFAULT_FACTORY_CONFIG )
+		end
+
+
+		#############################################################
+		###	I N S T A N C E   M E T H O D S
+		#############################################################
+
 		### Create a new RequestFactory with the given +config+, which will be merged with
 		### DEFAULT_FACTORY_CONFIG.
 		def initialize( config={} )
-			config[:headers] = DEFAULT_TESTING_HEADERS.merge( config[:headers] ) if config[:headers]
-			config = DEFAULT_FACTORY_CONFIG.merge( config )
+			config[:headers] = self.class.default_headers.merge( config[:headers] ) if config[:headers]
+			config = self.class.default_factory_config.merge( config )
 
 			@sender_id = config[:sender_id]
 			@host      = config[:host]
@@ -197,6 +213,189 @@ module Mongrel2
 		end
 
 	end # RequestFactory
+
+
+	### A factory for generating WebSocket request objects for testing.
+	class WebSocketFrameFactory < Mongrel2::RequestFactory
+		include Mongrel2::Constants
+
+		# The default host
+		DEFAULT_TESTING_HOST  = 'localhost'
+		DEFAULT_TESTING_PORT  = '8113'
+		DEFAULT_TESTING_ROUTE = '/ws'
+
+		# The default WebSocket opcode
+		DEFAULT_OPCODE = :text
+
+		# Default headers
+		DEFAULT_TESTING_HEADERS = {
+			'METHOD'                => 'WEBSOCKET',
+			'PATTERN'               => '/ws',
+			'URI'                   => '/ws',
+			'VERSION'               => 'HTTP/1.1',
+			'PATH'                  => '/ws',
+			'upgrade'               => 'websocket',
+			'host'                  => DEFAULT_TESTING_HOST,
+			'sec-websocket-key'     => 'rBP9u8uxVvIYrH/8bNOPwQ==',
+			'sec-websocket-version' => '13',
+			'connection'            => 'Upgrade',
+			'origin'                => "http://#{DEFAULT_TESTING_HOST}",
+			'FLAGS'                 => '0x89', # FIN + PING
+			'x-forwarded-for'       => '127.0.0.1'
+		}
+
+		# The defaults used by the websocket request factory
+		DEFAULT_FACTORY_CONFIG = {
+			:sender_id     => DEFAULT_TEST_UUID,
+			:conn_id       => DEFAULT_CONN_ID,
+			:host          => DEFAULT_TESTING_HOST,
+			:port          => DEFAULT_TESTING_PORT,
+			:route         => DEFAULT_TESTING_ROUTE,
+			:headers       => DEFAULT_TESTING_HEADERS,
+		}
+
+		# Freeze all testing constants
+		constants.each do |cname|
+			const_get(cname).freeze
+		end
+
+
+		### Create a new factory using the specified +config+.
+		def initialize( config={} )
+			config[:headers] = DEFAULT_TESTING_HEADERS.merge( config[:headers] ) if config[:headers]
+			config = DEFAULT_FACTORY_CONFIG.merge( config )
+
+			@sender_id = config[:sender_id]
+			@host      = config[:host]
+			@port      = config[:port]
+			@route     = config[:route]
+			@headers   = Mongrel2::Table.new( config[:headers] )
+
+			@conn_id   = 0
+		end
+
+		######
+		public
+		######
+
+		### Create a new request with the specified +uri+, +data+, and +flags+.
+		def create( uri, data, *flags )
+			raise "Request doesn't route through %p" % [ self.route ] unless
+				uri.start_with?( self.route )
+
+			headers = if flags.last.is_a?( Hash ) then flags.pop else {} end
+			flagheader = make_flags_header( flags )
+			headers = self.make_merged_headers( uri, flagheader, headers )
+			rclass = Mongrel2::Request.subclass_for_method( :WEBSOCKET )
+
+			return rclass.new( self.sender_id, self.conn_id.to_s, self.route, headers, data )
+		end
+
+
+		### Create a continuation frame.
+		def continuation( uri, payload='', *flags )
+			flags << :continuation
+			return self.create( uri, payload, flags )
+		end
+
+
+		### Create a text frame.
+		def text( uri, payload='', *flags )
+			flags << :text
+			return self.create( uri, payload, flags )
+		end
+
+
+		### Create a binary frame.
+		def binary( uri, payload='', *flags )
+			flags << :binary
+			return self.create( uri, payload, flags )
+		end
+
+
+		### Create a close frame.
+		def close( uri, payload='', *flags )
+			flags << :close << :fin
+			return self.create( uri, payload, flags )
+		end
+
+
+		### Create a ping frame.
+		def ping( uri, payload='', *flags )
+			flags << :ping << :fin
+			return self.create( uri, payload, flags )
+		end
+
+
+		### Create a pong frame.
+		def pong( uri, payload='', *flags )
+			flags << :pong << :fin
+			return self.create( uri, payload, flags )
+		end
+
+
+
+		#########
+		protected
+		#########
+
+		### Merge the factory's headers with +userheaders+, and then merge in the
+		### special headers that Mongrel2 adds that are based on the +uri+ and other
+		### server attributes.
+		def make_merged_headers( uri, flags, userheaders )
+			headers = self.headers.merge( userheaders )
+			uri = URI( uri )
+
+			# Add mongrel headers
+			headers.uri       = uri.to_s
+			headers.path      = uri.path
+			headers.host      = "%s:%d" % [ self.host, self.port ]
+			headers.query     = uri.query if uri.query
+			headers.pattern   = self.route
+			headers.origin    = "http://#{headers.host}"
+			headers.flags     = "0x%02x" % [ flags ]
+
+			return headers
+		end
+
+
+		#######
+		private
+		#######
+
+		### Make a flags value out of flag Symbols that correspond to the flag
+		### bits and opcodes: [ :fin, :rsv1, :rsv2, :rsv3, :continuation,
+		### :text, :binary, :close, :ping, :pong ]. If the flags contain
+		### Integers instead, they are ORed with the result.
+		def make_flags_header( *flag_symbols )
+			flag_symbols.flatten!
+			flag_symbols.compact!
+
+			Mongrel2.log.debug "Making a flags header for symbols: %p" % [ flag_symbols ]
+
+			return flag_symbols.inject( 0x00 ) do |flags, flag|
+				case flag
+				when :fin
+					flags | WebSocket::FIN_FLAG
+				when :rsv1
+					flags | WebSocket::RSV1_FLAG
+				when :rsv2
+					flags | WebSocket::RSV2_FLAG
+				when :rsv3
+					flags | WebSocket::RSV3_FLAG
+				when :continuation, :text, :binary, :close, :ping, :pong
+					# Opcodes clear any other opcodes present
+					flags ^= ( flags & WebSocket::OPCODE_BITMASK )
+					flags | WebSocket::OPCODE[ flag ]
+				when Integer
+					flags | flag
+				else
+					raise ArgumentError, "Don't know what the %p flag is." % [ flag ]
+				end
+			end
+		end
+
+	end # class WebSocketFrameFactory
 
 end # module Mongrel2
 
