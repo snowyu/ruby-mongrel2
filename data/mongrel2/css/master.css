@@ -57,21 +57,21 @@ tbody th {
 	margin: 2em 0;
 	padding: 2em;
 	border-radius: 0.5em;
-	background: rgba( 0,150,0, 0.25 );
+	background: rgba( 50,50,50, 0.5 );
 }
 
-.websocket-test form.socket-disconnected {
-	background: rgba( 50,50,50, 0.5 );
+.websocket-test form.socket-connected {
+	background: rgba( 0,150,0, 0.25 );
 }
 
 .websocket-test form input {
 	font-size: 1.4em;
 	width: 300px;
-	background: #eee;
 	border: 1px solid #aaa;
+	background: #ddd;
 }
 
-.websocket-test form.socket-disconnected input {
-	background: #ddd;
+.websocket-test form.socket-connected input {
+	background: #eee;
 }
 

@@ -7,6 +7,22 @@ require 'mongrel2/constants'
 
 # The Mongrel2 WebSocket namespace module. Contains constants and classes for
 # building WebSocket services.
+#
+#   class WebSocketEchoServer
+#
+#       def handle_websocket( frame )
+#
+#           # Close connections that send invalid frames
+#           if !frame.valid?
+#               res = frame.response( :close )
+#               res.set_close_status( WebSocket::CLOSE_PROTOCOL_ERROR )
+#               return res
+#           end
+#
+#           # Do something with the frame
+#           ...
+#       end
+#   end
 module Mongrel2::WebSocket
 
 	# WebSocket-related header and status constants
@@ -225,10 +241,14 @@ module Mongrel2::WebSocket
 
 		### Override the constructor to add Integer flags extracted from the FLAGS header.
 		def initialize( sender_id, conn_id, path, headers={}, payload='', raw=nil )
+			payload.force_encoding( Encoding::UTF_8 ) if
+				payload.encoding == Encoding::ASCII_8BIT
+
 			super
 
 			@flags = Integer( self.headers.flags || DEFAULT_FLAGS )
 			@request_frame = nil
+			@errors = []
 		end
 
 
@@ -247,6 +267,10 @@ module Mongrel2::WebSocket
 
 		# The frame that this one is a response to
 		attr_accessor :request_frame
+
+		# The Array of validation errors
+		attr_reader :errors
+
 
 		### Returns +true+ if the request's FIN flag is set. This flag indicates that
 		### this is the final fragment in a message.  The first fragment MAY also be
@@ -325,6 +349,26 @@ module Mongrel2::WebSocket
 		end
 
 
+		### Check the frame for problems, appending descriptions of any issues to
+		### the #errors array.
+		def validate
+			self.errors.clear
+
+			self.validate_payload_encoding
+			self.validate_control_frame
+			self.validate_opcode
+			self.validate_reserved_flags
+		end
+
+
+		### Sanity-checks the frame and returns +false+ if any problems are found.
+		### Error messages will be in #errors.
+		def valid?
+			self.validate
+			return self.errors.empty?
+		end
+
+
 		### Stringify into a response suitable for sending to the client.
 		def to_s
 			data = self.payload.to_s
@@ -336,11 +380,14 @@ module Mongrel2::WebSocket
 				data.encode!( Encoding::UTF_8 )
 			end
 
-			# Control frames: [RFC6455, section-5.5]: All control frames MUST
-			# have a payload length of 125 bytes or less and MUST NOT be
-			# fragmented.
-			self.check_control_frame( data ) if self.control?
+			# Make sure everything's in order
+			unless self.valid?
+				self.log.error "Validation failed."
+				raise Mongrel2::WebSocket::FrameError, "invalid frame: %s" %
+					[ self.errors.join( ', ' ) ]
+			end
 
+			# Now force everything into binary so it can be catenated
 			data.force_encoding( Encoding::ASCII_8BIT )
 			return [
 				self.make_header( data ),
@@ -353,6 +400,35 @@ module Mongrel2::WebSocket
 		### on the wire.
 		def bytes
 			return self.to_s.bytes
+		end
+
+
+		### Create a Mongrel2::Response that will respond to the same server/connection as
+		### the receiver. If you wish your specialized Request class to have a corresponding
+		### response type, you can override the Mongrel2::Request.response_class method
+		### to achieve that.
+		def response( *flags )
+			unless @response
+				@response = super()
+
+				# Set the opcode
+				self.log.debug "Setting up response %p with symmetrical flags" % [ @response ]
+				if self.opcode == :ping
+					@response.opcode = :pong
+					@response.payload = self.payload
+				else
+					@response.opcode = self.opcode
+				end
+
+				# Set flags in the response
+				unless flags.empty?
+					self.log.debug "  applying custom flags: %p" % [ flags ]
+					@response.set_flags( *flags )
+				end
+
+			end
+
+			return @response
 		end
 
 
@@ -381,34 +457,6 @@ module Mongrel2::WebSocket
 					raise ArgumentError, "Don't know what the %p flag is." % [ flag ]
 				end
 			end
-		end
-
-
-		### Create a Mongrel2::Response that will respond to the same server/connection as
-		### the receiver. If you wish your specialized Request class to have a corresponding
-		### response type, you can override the Mongrel2::Request.response_class method
-		### to achieve that.
-		def response( *flags )
-			unless @response
-				@response = super()
-
-				self.log.debug "Setting up response %p with symmetrical flags" % [ @response ]
-				if self.opcode == :ping
-					@response.opcode = :pong
-					@response.payload = self.payload
-				else
-					@response.opcode = self.opcode
-				end
-
-				unless flags.empty?
-					self.log.debug "  applying custom flags: %p" % [ flags ]
-					@response.set_flags( *flags )
-				end
-
-				self.log.debug "  response is now: %p" % [ @response ]
-			end
-
-			return @response
 		end
 
 
@@ -448,30 +496,62 @@ module Mongrel2::WebSocket
 				header = [ self.flags, length ].pack( 'c2' )
 			end
 
-			self.log.debug "  header is: %s" % [ header.unpack('h*').first.scan(/../).join(' ') ]
+			self.log.debug "  header is: 0: %02x %02x" % header.unpack('C*')
 			return header
+		end
+
+
+		### Validate that the payload encoding is correct for its opcode, attempting
+		### to transcode it if it's not. If the transcoding fails, adds an error to
+		### #errors.
+		def validate_payload_encoding
+			if self.opcode == :binary
+				self.log.debug "Binary payload: forcing to ASCII-8BIT"
+				self.payload.force_encoding( Encoding::ASCII_8BIT )
+			else
+				self.log.debug "Non-binary payload: forcing to UTF-8"
+				self.payload.force_encoding( Encoding::UTF_8 )
+				self.errors << "Invalid UTF8 in payload" unless self.payload.valid_encoding?
+			end
 		end
 
 
 		### Sanity-check control frame +data+, raising a Mongrel2::WebSocket::FrameError
 		### if there's a problem.
-		def check_control_frame( data )
-			self.log.debug "Checking for problems with a control frame:"
+		def validate_control_frame
+			return unless self.control?
 
-			self.log.debug "  payload bytesize should be < 125 bytes"
-			if data.bytesize > 125
-				self.log.error "Payload of control frame exceeds 125 bytes (%d)" % [ data.bytesize ]
-				raise Mongrel2::WebSocket::FrameError,
-					"payload of control frame cannot exceed 125 bytes"
+			if self.payload.bytesize > 125
+				self.log.error "Payload of control frame exceeds 125 bytes (%d)" % [ self.payload.bytesize ]
+				self.errors << "payload of control frame cannot exceed 125 bytes"
 			end
 
-			self.log.debug "  should not be fragmented"
 			unless self.fin?
 				self.log.error "Control frame fragmented (FIN is unset)"
-				raise Mongrel2::WebSocket::FrameError,
-					"control frame is fragmented (no FIN flag set)"
+				self.errors << "control frame is fragmented (no FIN flag set)"
 			end
 		end
+
+
+		### Ensure that the frame has a valid opcode in its header. If you're using reserved
+		### opcodes, you'll want to override this.
+		def validate_opcode
+			if self.opcode == :reserved
+				self.log.error "Frame uses reserved opcode 0x%x" % [ self.numeric_opcode ] 
+				self.errors << "Frame uses reserved opcode"
+			end
+		end
+
+
+		### Ensure that the frame doesn't have any of the reserved flags set (RSV1-3). If your
+		### subprotocol uses one or more of these, you'll want to override this method.
+		def validate_reserved_flags
+			if self.has_rsv_flags?
+				self.log.error "Frame has one or more reserved flags set."
+				self.errors << "Frame has one or more reserved flags set."
+			end
+		end
+
 
 	end # class Frame
 

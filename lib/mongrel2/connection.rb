@@ -136,7 +136,7 @@ class Mongrel2::Connection
 	### via the server specified by +sender_id+. The +client_ids+ should be an Array of
 	### Integer IDs no longer than Mongrel2::MAX_IDENTS.
 	def broadcast( sender_id, conn_ids, data )
-		idlist = conn_ids.map( &:to_s ).join( ' ' )
+		idlist = conn_ids.flatten.map( &:to_s ).join( ' ' )
 		self.send( sender_id, idlist, data )
 	end
 
@@ -188,7 +188,7 @@ class Mongrel2::Connection
 	### Returns a string containing a human-readable representation of the Connection,
 	### suitable for debugging.
 	def inspect
-		state = if @request_socket
+		state = if @request_sock
 			if self.closed?
 				"closed"
 			else

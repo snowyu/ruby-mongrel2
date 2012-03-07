@@ -29,7 +29,7 @@ server 'examples' do
 		dumper = handler( 'tcp://127.0.0.1:9997', 'request-dumper', protocol: 'tnetstring' )
 		route '/hello', handler( 'tcp://127.0.0.1:9999',  'helloworld-handler' )
 		route '/dump', dumper
-		route '/ws', handler( 'tcp://127.0.0.1:9995', 'ws-echo' )
+		route '/ws($)', handler( 'tcp://127.0.0.1:9995', 'ws-echo' )
 		route '@js', dumper
 		route '<xml', dumper
 

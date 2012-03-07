@@ -4,25 +4,28 @@
 
 == Description
 
-Ruby-Mongrel2 is a complete Ruby (1.9-only) connector for 
+Ruby-Mongrel2 is a complete Ruby (1.9-only) connector for
 Mongrel2[http://mongrel2.org/].
 
 This library includes configuration-database ORM classes, a Ruby
 implementation of the 'm2sh' tool, a configuration DSL for generating config
-databases in pure Ruby, a Control port interface object, and handler classes 
+databases in pure Ruby, a Control port interface object, and handler classes
 for creating applications or higher-level frameworks.
 
-It differs from the original Mongrel2 Ruby library (m2r), and the
-mongrel2-rack library in several ways:
+
+=== Other Implementations
+
+There are two other Mongrel2 Ruby libraries, +m2r+ and the +mongrel2-rack+
+library. This implementation differs from them in several ways:
 
 * It uses the C extension for 0MQ (zmq) instead of the FFI one. If you
   strongly prefer the FFI library, both of the other Mongrel2 libraries use
   it, so you'll want to stick to one of them.
 
-* It doesn't come with a Rack handler, or Rails examples, or anything fancy. I
-  intend to build my own webby framework bits around Mongrel2, and I thought
-  maybe someone else might want to as well. If you don't, well again, there
-  are two other libraries for you.
+* It doesn't come with a Rack handler, or Rails examples, or anything too
+  fancy. I intend to build my own webby framework bits around Mongrel2, and
+  I thought maybe someone else might want to as well. If you don't, well
+  again, there are two other libraries for you.
 
 * It includes configuration stuff. I want to make tools that use the Mongrel2
   config database, so I wrote config classes. Sequel::Model made it
@@ -36,7 +39,8 @@ mongrel2-rack library in several ways:
     gem install mongrel2
 
 
-This library uses Jeremy Hinegardner's 'amalgalite' library for the config ORM classes, but it will also fall back to using the sqlite3 library instead:
+This library uses Jeremy Hinegardner's 'amalgalite' library for the config ORM
+classes, but it will also fall back to using the sqlite3 library instead:
 
     # Loading the sqlite3 library explicitly
     $ rspec -rsqlite3 -cfp spec
@@ -95,6 +99,7 @@ Mongrel2 sends:
 * Mongrel2::HTTPRequest
 * Mongrel2::JSONRequest
 * Mongrel2::XMLRequest
+* Mongrel2::WebSocket::Frame
 
 These are all {overridable}[rdoc-ref:Mongrel2::Request.register_request_type]
 if you should want a more-specialized class for one of them.

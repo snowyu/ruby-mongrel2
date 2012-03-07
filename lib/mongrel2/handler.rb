@@ -161,8 +161,6 @@ class Mongrel2::Handler
 	def start_accepting_requests
 		until @conn.closed?
 			req = @conn.receive
-			self.log.info( req.inspect )
-
 			res = self.dispatch_request( req )
 
 			if res
@@ -171,10 +169,12 @@ class Mongrel2::Handler
 			end
 		end
 	rescue ZMQ::Error => err
-		self.log.error "%p while accepting requests: %s" % [ err.class, err.message ]
-		self.log.debug { err.backtrace.join("\n  ") }
+		unless @conn.closed?
+			self.log.error "%p while accepting requests: %s" % [ err.class, err.message ]
+			self.log.debug { err.backtrace.join("\n  ") }
 
-		retry unless @conn.closed?
+			retry
+		end
 	end
 
 
