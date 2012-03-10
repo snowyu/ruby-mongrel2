@@ -10,13 +10,16 @@ bin/m2sh.rb
 data/mongrel2/bootstrap.html
 data/mongrel2/config.sql
 data/mongrel2/css/master.css
+data/mongrel2/js/websock-test.js
 data/mongrel2/mimetypes.sql
+data/mongrel2/websock-test.html
 examples/README.txt
 examples/config.rb
 examples/helloworld-handler.rb
 examples/request-dumper.rb
 examples/request-dumper.tmpl
 examples/run
+examples/ws-echo.rb
 lib/mongrel2.rb
 lib/mongrel2/config.rb
 lib/mongrel2/config/directory.rb
@@ -45,6 +48,7 @@ lib/mongrel2/request.rb
 lib/mongrel2/response.rb
 lib/mongrel2/table.rb
 lib/mongrel2/testing.rb
+lib/mongrel2/websocket.rb
 lib/mongrel2/xmlrequest.rb
 spec/lib/constants.rb
 spec/lib/helpers.rb
@@ -72,4 +76,5 @@ spec/mongrel2/mixins_spec.rb
 spec/mongrel2/request_spec.rb
 spec/mongrel2/response_spec.rb
 spec/mongrel2/table_spec.rb
+spec/mongrel2/websocket_spec.rb
 spec/mongrel2_spec.rb

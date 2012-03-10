@@ -1,3 +1,8 @@
+== v0.16.0 [2012-03-10] Michael Granger <ged@FaerieMUD.org>
+
+- Add WebSocket (RFC6455) support
+
+
 == v0.15.1 [2012-03-02] Michael Granger <ged@FaerieMUD.org>
 
 - Make sure Mongrel2::Config::Host deletes cascade to their routes
