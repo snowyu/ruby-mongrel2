@@ -527,6 +527,7 @@ class Mongrel2::M2SHCommand
 
 		header "Reloading '%s'" % [ server.name ]
 		control.reload
+		control.close
 		message "done."
 	end
 	help :reload, "Reload the specified server's configuration"
@@ -540,6 +541,7 @@ class Mongrel2::M2SHCommand
 
 		header "Stopping '%s' gracefully." % [ server.name ]
 		control.stop
+		control.close
 		message "done."
 	end
 	help :stop, "Stop the specified server gracefully"
