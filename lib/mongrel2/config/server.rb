@@ -5,10 +5,12 @@ require 'pathname'
 
 require 'mongrel2' unless defined?( Mongrel2 )
 require 'mongrel2/config' unless defined?( Mongrel2::Config )
+require 'mongrel2/constants'
 
 
 # Mongrel2 Server configuration class
 class Mongrel2::Config::Server < Mongrel2::Config( :server )
+	include Mongrel2::Constants
 
 	### As of Mongrel2/1.7.5:
 	# CREATE TABLE server (id INTEGER PRIMARY KEY,
