@@ -120,7 +120,10 @@ module Mongrel2
 		### Reset the database connection that all model objects will use to +newdb+, which should
 		### be a Sequel::Database.
 		def self::db=( newdb )
-			super
+			self.without_sql_logging( newdb ) do
+				super
+			end
+
 			if self == Mongrel2::Config
 				Mongrel2.log.debug "Resetting database connection for %d config classes to: %p" %
 					[ self.descendents.length, newdb ]
@@ -166,7 +169,9 @@ module Mongrel2
 		### Returns +true+ if the config database has been installed. This currently only
 		### checks to see if the 'server' table exists for the sake of speed.
 		def self::database_initialized?
-			return self.db.table_exists?( :server )
+			return self.without_sql_logging do
+				self.db.table_exists?( :server )
+			end
 		end
 
 
@@ -201,6 +206,24 @@ module Mongrel2
 			return nil if pathname.empty?
 			return Pathname( pathname )
 		end
+
+
+		#########
+		protected
+		#########
+
+		### Execute a block after removing all loggers from the current database handle, then
+		### restore them before returning.
+		def self::without_sql_logging( logged_db=nil )
+			logged_db ||= self.db
+
+			loggers_to_restore = logged_db.loggers.dup
+			logged_db.loggers.clear
+			yield
+		ensure
+			logged_db.loggers.replace( loggers_to_restore )
+		end
+
 
 	end # class Config
 
