@@ -516,7 +516,7 @@ module Mongrel2::WebSocket
 		end
 
 
-		### Sanity-check control frame +data+, raising a Mongrel2::WebSocket::FrameError
+		### Sanity-check control frame +data+, adding an error message to #errors
 		### if there's a problem.
 		def validate_control_frame
 			return unless self.control?
