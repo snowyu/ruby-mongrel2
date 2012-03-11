@@ -35,6 +35,7 @@ hoespec = Hoe.spec 'mongrel2' do
 	self.dependency 'zmq',        '~> 2.1.4'
 
 	self.dependency 'configurability', '~> 1.0', :developer
+	self.dependency 'simplecov',       '~> 0.6', :developer
 	self.dependency 'rspec',           '~> 2.8', :developer
 
 	self.spec_extras[:licenses] = ["BSD"]
